@@ -243,7 +243,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public void createDestroyItems(BuildingSlotBlock slot)
 	{
-		int hardness = (int) Math.ceil(getBlockBreakEnergy(slot) / BuilderAPI.BREAK_ENERGY);
+		int hardness = (int) Math.ceil((double) getBlockBreakEnergy(slot) / BuilderAPI.BREAK_ENERGY);
 
 		for (int i = 0; i < hardness; ++i)
 		{
@@ -253,13 +253,10 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public void useRequirements(IInventory inv, BuildingSlot slot)
 	{
-
 	}
 
 	public void saveBuildStateToNBT(NBTTagCompound nbt, IBuildingItemsProvider builder)
 	{
-		NBTTagList clearList = new NBTTagList();
-
 		nbt.setByteArray("usedLocationList", BitSetUtils.toByteArray(usedLocations));
 
 		NBTTagList buildingList = new NBTTagList();

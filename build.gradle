@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "7.0.11"
+version = "7.0.12"
 group= "com.mod-buildcraft"
 archivesBaseName = "buildcraft"
 
@@ -29,10 +29,10 @@ minecraft {
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/buildcraft-7.0.11-dev.jar')
+	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/buildcraft-7.0.12-dev.jar')
 }
 
 jar {
-	from zipTree('lib/buildcraft-7.0.11.jar')
+	from zipTree('lib/buildcraft-7.0.12.jar')
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

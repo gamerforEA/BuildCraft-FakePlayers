@@ -8,19 +8,19 @@
  */
 package buildcraft.robotics.ai;
 
+import com.gamerforea.buildcraft.FakePlayerUtils;
+
+import buildcraft.api.core.BlockIndex;
+import buildcraft.api.robots.AIRobot;
+import buildcraft.api.robots.EntityRobotBase;
+import buildcraft.core.lib.utils.BlockUtils;
+import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
-import buildcraft.api.core.BlockIndex;
-import buildcraft.api.robots.AIRobot;
-import buildcraft.api.robots.EntityRobotBase;
-import buildcraft.core.lib.utils.BlockUtils;
-import buildcraft.core.proxy.CoreProxy;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
 
 public class AIRobotUseToolOnBlock extends AIRobot
 {

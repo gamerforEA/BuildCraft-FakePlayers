@@ -8,20 +8,20 @@
  */
 package buildcraft.robotics.ai;
 
-import net.minecraft.block.Block;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.ForgeHooks;
+import com.gamerforea.buildcraft.FakePlayerUtils;
+
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.robots.AIRobot;
 import buildcraft.api.robots.EntityRobotBase;
 import buildcraft.core.lib.utils.BlockUtils;
 import buildcraft.core.proxy.CoreProxy;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import net.minecraft.block.Block;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeHooks;
 
 public class AIRobotBreak extends AIRobot
 {
@@ -128,13 +128,12 @@ public class AIRobotBreak extends AIRobot
 		if (f > 1.0F)
 		{
 			int i = EnchantmentHelper.getEfficiencyModifier(robot);
-			ItemStack itemstack = usingItem;
 
-			if (i > 0 && itemstack != null)
+			if (i > 0)
 			{
 				float f1 = i * i + 1;
 
-				boolean canHarvest = ForgeHooks.canToolHarvestBlock(block, meta, itemstack);
+				boolean canHarvest = ForgeHooks.canToolHarvestBlock(block, meta, usingItem);
 
 				if (!canHarvest && f <= 1.0F)
 				{
@@ -154,6 +153,12 @@ public class AIRobotBreak extends AIRobot
 	public int getEnergyCost()
 	{
 		return (int) Math.ceil((float) BuilderAPI.BREAK_ENERGY * 2 / 30.0F);
+	}
+
+	@Override
+	public boolean canLoadFromNBT()
+	{
+		return true;
 	}
 
 	@Override

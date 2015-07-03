@@ -1,18 +1,18 @@
 package com.gamerforea.buildcraft;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-
 import org.bukkit.Bukkit;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 import com.gamerforea.wgew.cauldron.event.CauldronBlockBreakEvent;
 import com.gamerforea.wgew.cauldron.event.CauldronEntityDamageByEntityEvent;
 import com.mojang.authlib.GameProfile;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 
 public final class FakePlayerUtils
 {

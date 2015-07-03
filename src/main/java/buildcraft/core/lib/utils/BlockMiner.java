@@ -2,6 +2,11 @@ package buildcraft.core.lib.utils;
 
 import java.util.List;
 
+import com.gamerforea.buildcraft.FakePlayerUtils;
+
+import buildcraft.BuildCraftCore;
+import buildcraft.core.lib.block.TileBuildCraft;
+import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,11 +15,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
-import buildcraft.BuildCraftCore;
-import buildcraft.core.lib.block.TileBuildCraft;
-import buildcraft.core.proxy.CoreProxy;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
 
 public class BlockMiner
 {

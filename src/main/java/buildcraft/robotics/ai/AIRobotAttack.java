@@ -8,13 +8,13 @@
  */
 package buildcraft.robotics.ai;
 
-import net.minecraft.entity.Entity;
+import com.gamerforea.buildcraft.FakePlayerUtils;
+
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.robots.AIRobot;
 import buildcraft.api.robots.EntityRobotBase;
 import buildcraft.robotics.EntityRobot;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import net.minecraft.entity.Entity;
 
 public class AIRobotAttack extends AIRobot
 {
@@ -52,7 +52,7 @@ public class AIRobotAttack extends AIRobot
 	@Override
 	public void update()
 	{
-		if (target.isDead)
+		if (target == null || target.isDead)
 		{
 			terminate();
 			return;

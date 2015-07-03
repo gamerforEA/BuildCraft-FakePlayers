@@ -10,6 +10,14 @@ package buildcraft.api.robots;
 
 import java.util.UUID;
 
+import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.google.common.base.Strings;
+import com.mojang.authlib.GameProfile;
+
+import buildcraft.api.boards.RedstoneBoardRobot;
+import buildcraft.api.core.IZone;
+import buildcraft.core.proxy.CoreProxy;
+import cofh.api.energy.IEnergyStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,14 +29,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fluids.IFluidHandler;
-import buildcraft.api.boards.RedstoneBoardRobot;
-import buildcraft.api.core.IZone;
-import buildcraft.core.proxy.CoreProxy;
-import cofh.api.energy.IEnergyStorage;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
-import com.google.common.base.Strings;
-import com.mojang.authlib.GameProfile;
 
 public abstract class EntityRobotBase extends EntityLiving implements IInventory, IFluidHandler
 {

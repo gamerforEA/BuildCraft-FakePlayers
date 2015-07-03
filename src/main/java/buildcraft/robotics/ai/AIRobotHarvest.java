@@ -3,18 +3,18 @@ package buildcraft.robotics.ai;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.WorldServer;
+import com.gamerforea.buildcraft.FakePlayerUtils;
+
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.crops.CropManager;
 import buildcraft.api.robots.AIRobot;
 import buildcraft.api.robots.EntityRobotBase;
 import buildcraft.core.lib.utils.BlockUtils;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.WorldServer;
 
 public class AIRobotHarvest extends AIRobot
 {
@@ -70,6 +70,12 @@ public class AIRobotHarvest extends AIRobot
 				BlockUtils.dropItem((WorldServer) robot.worldObj, MathHelper.floor_double(robot.posX), MathHelper.floor_double(robot.posY), MathHelper.floor_double(robot.posZ), 6000, stack);
 			}
 		}
+	}
+
+	@Override
+	public boolean canLoadFromNBT()
+	{
+		return true;
 	}
 
 	@Override

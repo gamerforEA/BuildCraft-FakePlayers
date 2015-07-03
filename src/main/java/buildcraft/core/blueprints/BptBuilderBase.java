@@ -10,22 +10,9 @@ package buildcraft.core.blueprints;
 
 import java.util.BitSet;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.world.BlockEvent;
-
 import org.apache.logging.log4j.Level;
+
+import com.gamerforea.buildcraft.FakePlayerUtils;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.BuilderAPI;
@@ -47,8 +34,20 @@ import buildcraft.core.lib.block.TileBuildCraft;
 import buildcraft.core.lib.utils.BitSetUtils;
 import buildcraft.core.lib.utils.BlockUtils;
 import buildcraft.core.proxy.CoreProxy;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.world.BlockEvent;
 
 public abstract class BptBuilderBase implements IAreaProvider
 {

@@ -20,8 +20,6 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 
 import com.gamerforea.buildcraft.FakePlayerUtils;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
 
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.blueprints.Schematic;
@@ -45,7 +43,6 @@ import buildcraft.core.lib.inventory.InventoryIterator;
 import buildcraft.core.lib.inventory.StackHelper;
 import buildcraft.core.lib.utils.BlockUtils;
 import buildcraft.core.proxy.CoreProxy;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -63,13 +60,12 @@ import net.minecraftforge.fluids.FluidStack;
 
 public class BptBuilderBlueprint extends BptBuilderBase
 {
-
 	public ArrayList<RequirementItemStack> neededItems = new ArrayList<RequirementItemStack>();
 
 	protected HashSet<Integer> builtEntities = new HashSet<Integer>();
 
 	private HashMap<BuilderItemMetaPair, List<BuildingSlotBlock>> buildList = new HashMap<BuilderItemMetaPair, List<BuildingSlotBlock>>();
-	private Multiset<Integer> buildStageOccurences = HashMultiset.create();
+	private int[] buildStageOccurences;
 	private LinkedList<BuildingSlotEntity> entityList = new LinkedList<BuildingSlotEntity>();
 	private LinkedList<BuildingSlot> postProcessing = new LinkedList<BuildingSlot>();
 	private BuildingSlotMapIterator iterator;
@@ -325,9 +321,9 @@ public class BptBuilderBlueprint extends BptBuilderBase
 	private int getBuildListCount()
 	{
 		int out = 0;
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < buildStageOccurences.length; i++)
 		{
-			out += buildStageOccurences.count(i);
+			out += buildStageOccurences[i];
 		}
 		return out;
 	}
@@ -361,7 +357,17 @@ public class BptBuilderBlueprint extends BptBuilderBase
 				buildList.put(imp, new ArrayList<BuildingSlotBlock>());
 			}
 			buildList.get(imp).add(b);
-			buildStageOccurences.add(b.buildStage);
+			if (buildStageOccurences == null)
+			{
+				buildStageOccurences = new int[Math.max(4, b.buildStage + 1)];
+			}
+			else if (buildStageOccurences.length <= b.buildStage)
+			{
+				int[] newBSO = new int[b.buildStage + 1];
+				System.arraycopy(buildStageOccurences, 0, newBSO, 0, buildStageOccurences.length);
+				buildStageOccurences = newBSO;
+			}
+			buildStageOccurences[b.buildStage]++;
 		}
 	}
 
@@ -412,7 +418,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 
 			for (int i = 0; i < slot.buildStage; i++)
 			{
-				if (buildStageOccurences.count(i) > 0)
+				if (buildStageOccurences[i] > 0)
 				{
 					iterator.skipList();
 					skipped = true;

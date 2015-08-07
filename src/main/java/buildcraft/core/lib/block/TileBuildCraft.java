@@ -62,46 +62,45 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 
 	public EntityPlayer getOwnerFake()
 	{
-		if (this.ownerFake != null) return this.ownerFake;
-		else if (this.ownerProfile != null) return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else return CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.worldObj).get();
+		if (this.ownerFake != null)
+			return this.ownerFake;
+		else if (this.ownerProfile != null)
+			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
+		else
+			return CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.worldObj).get();
 	}
 	// TODO gamerforEA code end
 
 	public String getOwner()
 	{
-		return owner;
+		return this.owner;
 	}
 
 	public void addGuiWatcher(EntityPlayer player)
 	{
-		if (!guiWatchers.contains(player))
-		{
-			guiWatchers.add(player);
-		}
+		if (!this.guiWatchers.contains(player))
+			this.guiWatchers.add(player);
 	}
 
 	public void removeGuiWatcher(EntityPlayer player)
 	{
-		if (guiWatchers.contains(player))
-		{
-			guiWatchers.remove(player);
-		}
+		if (this.guiWatchers.contains(player))
+			this.guiWatchers.remove(player);
 	}
 
 	@Override
 	public void updateEntity()
 	{
-		if (!init && !isInvalid())
+		if (!this.init && !this.isInvalid())
 		{
-			initialize();
-			init = true;
+			this.initialize();
+			this.init = true;
 		}
 
-		if (battery != null)
+		if (this.battery != null)
 		{
-			receivedTick = 0;
-			extractedTick = 0;
+			this.receivedTick = 0;
+			this.extractedTick = 0;
 		}
 	}
 
@@ -113,22 +112,22 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	public void validate()
 	{
 		super.validate();
-		cache = null;
+		this.cache = null;
 	}
 
 	@Override
 	public void invalidate()
 	{
-		init = false;
+		this.init = false;
 		super.invalidate();
-		cache = null;
+		this.cache = null;
 	}
 
 	public void onBlockPlacedBy(EntityLivingBase entity, ItemStack stack)
 	{
 		if (entity instanceof EntityPlayer)
 		{
-			owner = ((EntityPlayer) entity).getDisplayName();
+			this.owner = ((EntityPlayer) entity).getDisplayName();
 			// TODO gamerforEA code start
 			this.ownerProfile = ((EntityPlayer) entity).getGameProfile();
 			// TODO gamerforEA code end
@@ -137,21 +136,21 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 
 	public void destroy()
 	{
-		cache = null;
+		this.cache = null;
 	}
 
 	public void sendNetworkUpdate()
 	{
-		if (worldObj != null && !worldObj.isRemote)
-		{
-			BuildCraftCore.instance.sendToPlayers(getPacketUpdate(), worldObj, xCoord, yCoord, zCoord, DefaultProps.NETWORK_UPDATE_RANGE);
-		}
+		if (this.worldObj != null && !this.worldObj.isRemote)
+			BuildCraftCore.instance.sendToPlayers(this.getPacketUpdate(), this.worldObj, this.xCoord, this.yCoord, this.zCoord, DefaultProps.NETWORK_UPDATE_RANGE);
 	}
 
+	@Override
 	public void writeData(ByteBuf stream)
 	{
 	}
 
+	@Override
 	public void readData(ByteBuf stream)
 	{
 	}
@@ -164,24 +163,22 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	@Override
 	public net.minecraft.network.Packet getDescriptionPacket()
 	{
-		return Utils.toPacket(getPacketUpdate(), 0);
+		return Utils.toPacket(this.getPacketUpdate(), 0);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt)
 	{
 		super.writeToNBT(nbt);
-		nbt.setString("owner", owner);
-		if (battery != null)
+		nbt.setString("owner", this.owner);
+		if (this.battery != null)
 		{
 			NBTTagCompound batteryNBT = new NBTTagCompound();
-			battery.writeToNBT(batteryNBT);
+			this.battery.writeToNBT(batteryNBT);
 			nbt.setTag("battery", batteryNBT);
 		}
-		if (mode != null)
-		{
-			nbt.setByte("lastMode", (byte) mode.ordinal());
-		}
+		if (this.mode != null)
+			nbt.setByte("lastMode", (byte) this.mode.ordinal());
 		// TODO gamerforEA code start
 		if (this.ownerProfile != null)
 		{
@@ -196,36 +193,31 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	{
 		super.readFromNBT(nbt);
 		if (nbt.hasKey("owner"))
-		{
-			owner = nbt.getString("owner");
-		}
-		if (battery != null)
-		{
-			battery.readFromNBT(nbt.getCompoundTag("battery"));
-		}
+			this.owner = nbt.getString("owner");
+		if (this.battery != null)
+			this.battery.readFromNBT(nbt.getCompoundTag("battery"));
 		if (nbt.hasKey("lastMode"))
-		{
-			mode = IControllable.Mode.values()[nbt.getByte("lastMode")];
-		}
+			this.mode = IControllable.Mode.values()[nbt.getByte("lastMode")];
 		// TODO gamerforEA code start
 		String uuid = nbt.getString("ownerUUID");
 		if (!Strings.isNullOrEmpty(uuid))
 		{
 			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name)) this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
+			if (!Strings.isNullOrEmpty(name))
+				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
 		}
 		// TODO gamerforEA code end
 	}
 
 	protected int getTicksSinceEnergyReceived()
 	{
-		return (int) (worldObj.getTotalWorldTime() - worldTimeEnergyReceive);
+		return (int) (this.worldObj.getTotalWorldTime() - this.worldTimeEnergyReceive);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return (xCoord * 37 + yCoord) * 37 + zCoord;
+		return (this.xCoord * 37 + this.yCoord) * 37 + this.zCoord;
 	}
 
 	@Override
@@ -237,77 +229,64 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	@Override
 	public boolean canConnectEnergy(ForgeDirection from)
 	{
-		return battery != null;
+		return this.battery != null;
 	}
 
 	@Override
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate)
 	{
-		if (battery != null && this.canConnectEnergy(from))
+		if (this.battery != null && this.canConnectEnergy(from))
 		{
-			int received = battery.receiveEnergy(maxReceive - receivedTick, simulate);
+			int received = this.battery.receiveEnergy(maxReceive - this.receivedTick, simulate);
 			if (!simulate)
 			{
-				receivedTick += received;
-				worldTimeEnergyReceive = worldObj.getTotalWorldTime();
+				this.receivedTick += received;
+				this.worldTimeEnergyReceive = this.worldObj.getTotalWorldTime();
 			}
 			return received;
 		}
 		else
-		{
 			return 0;
-		}
 	}
 
 	/**
 	 * If you want to use this, implement IEnergyProvider.
 	 */
+	@Override
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate)
 	{
-		if (battery != null && this.canConnectEnergy(from))
+		if (this.battery != null && this.canConnectEnergy(from))
 		{
-			int extracted = battery.extractEnergy(maxExtract - extractedTick, simulate);
+			int extracted = this.battery.extractEnergy(maxExtract - this.extractedTick, simulate);
 			if (!simulate)
-			{
-				extractedTick += extracted;
-			}
+				this.extractedTick += extracted;
 			return extracted;
 		}
 		else
-		{
 			return 0;
-		}
 	}
 
 	@Override
 	public int getEnergyStored(ForgeDirection from)
 	{
-		if (battery != null && this.canConnectEnergy(from))
-		{
-			return battery.getEnergyStored();
-		}
+		if (this.battery != null && this.canConnectEnergy(from))
+			return this.battery.getEnergyStored();
 		else
-		{
 			return 0;
-		}
 	}
 
 	@Override
 	public int getMaxEnergyStored(ForgeDirection from)
 	{
-		if (battery != null && this.canConnectEnergy(from))
-		{
-			return battery.getMaxEnergyStored();
-		}
+		if (this.battery != null && this.canConnectEnergy(from))
+			return this.battery.getMaxEnergyStored();
 		else
-		{
 			return 0;
-		}
 	}
 
 	public RFBattery getBattery()
 	{
-		return battery;
+		return this.battery;
 	}
 
 	protected void setBattery(RFBattery battery)
@@ -317,25 +296,21 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 
 	public Block getBlock(ForgeDirection side)
 	{
-		if (cache == null)
-		{
-			cache = TileBuffer.makeBuffer(worldObj, xCoord, yCoord, zCoord, false);
-		}
-		return cache[side.ordinal()].getBlock();
+		if (this.cache == null)
+			this.cache = TileBuffer.makeBuffer(this.worldObj, this.xCoord, this.yCoord, this.zCoord, false);
+		return this.cache[side.ordinal()].getBlock();
 	}
 
 	public TileEntity getTile(ForgeDirection side)
 	{
-		if (cache == null)
-		{
-			cache = TileBuffer.makeBuffer(worldObj, xCoord, yCoord, zCoord, false);
-		}
-		return cache[side.ordinal()].getTile();
+		if (this.cache == null)
+			this.cache = TileBuffer.makeBuffer(this.worldObj, this.xCoord, this.yCoord, this.zCoord, false);
+		return this.cache[side.ordinal()].getTile();
 	}
 
 	public IControllable.Mode getControlMode()
 	{
-		return mode;
+		return this.mode;
 	}
 
 	public void setControlMode(IControllable.Mode mode)

@@ -43,9 +43,12 @@ public abstract class EntityRobotBase extends EntityLiving implements IInventory
 
 	public EntityPlayer getOwnerFake()
 	{
-		if (this.ownerFake != null) return this.ownerFake;
-		else if (this.ownerProfile != null) return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else return CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.worldObj).get();
+		if (this.ownerFake != null)
+			return this.ownerFake;
+		else if (this.ownerProfile != null)
+			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
+		else
+			return CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.worldObj).get();
 	}
 
 	@Override
@@ -67,7 +70,8 @@ public abstract class EntityRobotBase extends EntityLiving implements IInventory
 		if (!Strings.isNullOrEmpty(uuid))
 		{
 			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name)) this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
+			if (!Strings.isNullOrEmpty(name))
+				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
 		}
 	}
 	// TODO gamerforEA code end

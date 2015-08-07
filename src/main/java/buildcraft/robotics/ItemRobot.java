@@ -61,9 +61,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 
 			RedstoneBoardRobotNBT robotNBT = getRobotNBT(nbt);
 			if (robotNBT == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
-			{
 				return null;
-			}
 			EntityRobot robot = new EntityRobot(world, robotNBT);
 			robot.getBattery().setEnergy(getEnergy(nbt));
 			// TODO gamerforEA code start
@@ -107,14 +105,10 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 			int pct = energy * 100 / EntityRobotBase.MAX_ENERGY;
 			String enInfo = pct + "% Charged";
 			if (energy == EntityRobotBase.MAX_ENERGY)
-			{
 				enInfo = "Full Charge";
-			}
 			else if (energy == 0)
-			{
 				enInfo = "No Charge";
-			}
-			enInfo = (pct >= 80 ? EnumChatFormatting.GREEN : (pct >= 50 ? EnumChatFormatting.YELLOW : (pct >= 30 ? EnumChatFormatting.GOLD : (pct >= 20 ? EnumChatFormatting.RED : EnumChatFormatting.DARK_RED)))) + enInfo;
+			enInfo = (pct >= 80 ? EnumChatFormatting.GREEN : pct >= 50 ? EnumChatFormatting.YELLOW : pct >= 30 ? EnumChatFormatting.GOLD : pct >= 20 ? EnumChatFormatting.RED : EnumChatFormatting.DARK_RED) + enInfo;
 			list.add(enInfo);
 		}
 	}
@@ -143,14 +137,12 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 		itemList.add(createRobotStack(RedstoneBoardRegistry.instance.getEmptyRobotBoard(), 0));
 
 		for (RedstoneBoardNBT boardNBT : RedstoneBoardRegistry.instance.getAllBoardNBTs())
-		{
 			if (boardNBT instanceof RedstoneBoardRobotNBT)
 			{
 				RedstoneBoardRobotNBT robotNBT = (RedstoneBoardRobotNBT) boardNBT;
 				itemList.add(createRobotStack(robotNBT, 0));
 				itemList.add(createRobotStack(robotNBT, EntityRobotBase.MAX_ENERGY));
 			}
-		}
 	}
 
 	@Override
@@ -158,15 +150,11 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	{
 		NBTTagCompound cpt = getNBT(container);
 		if (getRobotNBT(cpt) == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
-		{
 			return 0;
-		}
 		int currentEnergy = getEnergy(cpt);
 		int energyReceived = Math.min(EntityRobotBase.MAX_ENERGY - currentEnergy, maxReceive);
 		if (!simulate)
-		{
 			setEnergy(cpt, currentEnergy + energyReceived);
-		}
 		return energyReceived;
 	}
 
@@ -175,15 +163,11 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	{
 		NBTTagCompound cpt = getNBT(container);
 		if (getRobotNBT(cpt) == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
-		{
 			return 0;
-		}
 		int currentEnergy = getEnergy(cpt);
 		int energyExtracted = Math.min(currentEnergy, maxExtract);
 		if (!simulate)
-		{
 			setEnergy(cpt, currentEnergy - energyExtracted);
-		}
 		return energyExtracted;
 	}
 
@@ -197,9 +181,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	public int getMaxEnergyStored(ItemStack container)
 	{
 		if (getRobotNBT(container) == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
-		{
 			return 0;
-		}
 		return EntityRobotBase.MAX_ENERGY;
 	}
 
@@ -210,15 +192,11 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 		{
 			Block b = world.getBlock(x, y, z);
 			if (!(b instanceof BlockGenericPipe))
-			{
 				return false;
-			}
 
 			Pipe<?> pipe = BlockGenericPipe.getPipe(world, x, y, z);
 			if (pipe == null)
-			{
 				return false;
-			}
 
 			BlockGenericPipe pipeBlock = (BlockGenericPipe) b;
 			BlockGenericPipe.RaytraceResult rayTraceResult = pipeBlock.doRayTrace(world, x, y, z, player);
@@ -232,15 +210,11 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 				{
 					RedstoneBoardRobotNBT robotNBT = ItemRobot.getRobotNBT(currentItem);
 					if (robotNBT == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
-					{
 						return true;
-					}
 					RobotPlacementEvent robotEvent = new RobotPlacementEvent(player, robotNBT.getID());
 					FMLCommonHandler.instance().bus().post(robotEvent);
 					if (robotEvent.isCanceled())
-					{
 						return true;
-					}
 					EntityRobot robot = ((ItemRobot) currentItem.getItem()).createRobot(player, currentItem, world); // TODO gamerforEA add EntityPlayer parameter
 
 					if (robot != null && robot.getRegistry() != null)
@@ -257,9 +231,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 						world.spawnEntityInWorld(robot);
 
 						if (!player.capabilities.isCreativeMode)
-						{
 							player.getCurrentEquippedItem().stackSize--;
-						}
 					}
 				}
 
@@ -273,9 +245,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	{
 		NBTTagCompound cpt = NBTUtils.getItemData(stack);
 		if (!cpt.hasKey("board"))
-		{
 			RedstoneBoardRegistry.instance.getEmptyRobotBoard().createBoard(cpt);
-		}
 		return cpt;
 	}
 

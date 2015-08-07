@@ -32,13 +32,13 @@ public class AIRobotPumpBlock extends AIRobot
 	{
 		this(iRobot);
 
-		blockToPump = iBlockToPump;
+		this.blockToPump = iBlockToPump;
 	}
 
 	@Override
 	public void start()
 	{
-		robot.aimItemAt(blockToPump.x, blockToPump.y, blockToPump.z);
+		this.robot.aimItemAt(this.blockToPump.x, this.blockToPump.y, this.blockToPump.z);
 	}
 
 	@Override
@@ -50,22 +50,16 @@ public class AIRobotPumpBlock extends AIRobot
 	@Override
 	public void update()
 	{
-		if (waited < 40)
-		{
-			waited++;
-		}
+		if (this.waited < 40)
+			this.waited++;
 		else
 		{
-			FluidStack fluidStack = BlockUtils.drainBlock(robot.worldObj, blockToPump.x, blockToPump.y, blockToPump.z, false);
+			FluidStack fluidStack = BlockUtils.drainBlock(this.robot.worldObj, this.blockToPump.x, this.blockToPump.y, this.blockToPump.z, false);
 			// TODO gamerforEA add condition
-			if (fluidStack != null && !FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), blockToPump.x, blockToPump.y, blockToPump.z))
-			{
-				if (robot.fill(ForgeDirection.UNKNOWN, fluidStack, true) > 0)
-				{
-					BlockUtils.drainBlock(robot.worldObj, blockToPump.x, blockToPump.y, blockToPump.z, true);
-				}
-			}
-			terminate();
+			if (fluidStack != null && !FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), this.blockToPump.x, this.blockToPump.y, this.blockToPump.z))
+				if (this.robot.fill(ForgeDirection.UNKNOWN, fluidStack, true) > 0)
+					BlockUtils.drainBlock(this.robot.worldObj, this.blockToPump.x, this.blockToPump.y, this.blockToPump.z, true);
+			this.terminate();
 		}
 	}
 
@@ -78,6 +72,6 @@ public class AIRobotPumpBlock extends AIRobot
 	@Override
 	public boolean success()
 	{
-		return pumped > 0;
+		return this.pumped > 0;
 	}
 }

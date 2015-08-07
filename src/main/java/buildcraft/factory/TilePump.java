@@ -58,7 +58,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 	private SafeTimeTracker timer = new SafeTimeTracker(REBUID_DELAY);
 	private int tick = Utils.RANDOM.nextInt(32);
-	private int tickPumped = tick - 20;
+	private int tickPumped = this.tick - 20;
 	private int numFluidBlocksFound = 0;
 	private boolean powered = false;
 
@@ -77,197 +77,159 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	{
 		super.updateEntity();
 
-		if (powered)
+		if (this.powered)
 		{
-			pumpLayerQueues.clear();
-			destroyTube();
+			this.pumpLayerQueues.clear();
+			this.destroyTube();
 		}
 		else
-		{
-			createTube();
-		}
+			this.createTube();
 
-		if (worldObj.isRemote)
+		if (this.worldObj.isRemote)
+			return;
+
+		if (this.updateTracker.markTimeIfDelay(this.worldObj))
+			this.sendNetworkUpdate();
+
+		this.pushToConsumers();
+
+		if (this.powered)
+			return;
+
+		if (this.tube == null)
+			return;
+
+		if (this.tube.posY - this.aimY > 0.01)
 		{
+			this.tubeY = this.tube.posY - 0.01;
+			this.setTubePosition();
+			this.sendNetworkUpdate();
 			return;
 		}
 
-		if (updateTracker.markTimeIfDelay(worldObj))
-		{
-			sendNetworkUpdate();
-		}
+		this.tick++;
 
-		pushToConsumers();
-
-		if (powered)
-		{
+		if (this.tick % 16 != 0)
 			return;
-		}
 
-		if (tube == null)
-		{
-			return;
-		}
+		BlockIndex index = this.getNextIndexToPump(false);
 
-		if (tube.posY - aimY > 0.01)
-		{
-			tubeY = tube.posY - 0.01;
-			setTubePosition();
-			sendNetworkUpdate();
-			return;
-		}
-
-		tick++;
-
-		if (tick % 16 != 0)
-		{
-			return;
-		}
-
-		BlockIndex index = getNextIndexToPump(false);
-
-		FluidStack fluidToPump = index != null ? BlockUtils.drainBlock(worldObj, index.x, index.y, index.z, false) : null;
+		FluidStack fluidToPump = index != null ? BlockUtils.drainBlock(this.worldObj, index.x, index.y, index.z, false) : null;
 		if (fluidToPump != null)
 		{
-			if (isFluidAllowed(fluidToPump.getFluid()) && tank.fill(fluidToPump, false) == fluidToPump.amount)
-			{
-				if (getBattery().useEnergy(100, 100, false) > 0)
+			if (this.isFluidAllowed(fluidToPump.getFluid()) && this.tank.fill(fluidToPump, false) == fluidToPump.amount)
+				if (this.getBattery().useEnergy(100, 100, false) > 0)
 				{
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(this.getOwnerFake(), index.x, index.y, index.z)) return;
+					if (FakePlayerUtils.cantBreak(this.getOwnerFake(), index.x, index.y, index.z))
+						return;
 					// TODO gamerforEA code end
-					if (fluidToPump.getFluid() != FluidRegistry.WATER || BuildCraftCore.consumeWaterSources || numFluidBlocksFound < 9)
+					if (fluidToPump.getFluid() != FluidRegistry.WATER || BuildCraftCore.consumeWaterSources || this.numFluidBlocksFound < 9)
 					{
-						index = getNextIndexToPump(true);
-						BlockUtils.drainBlock(worldObj, index.x, index.y, index.z, true);
+						index = this.getNextIndexToPump(true);
+						BlockUtils.drainBlock(this.worldObj, index.x, index.y, index.z, true);
 					}
 
-					tank.fill(fluidToPump, true);
-					tickPumped = tick;
+					this.tank.fill(fluidToPump, true);
+					this.tickPumped = this.tick;
 				}
-			}
 		}
-		else
+		else if (this.tick % 128 == 0)
 		{
-			if (tick % 128 == 0)
-			{
-				// TODO: improve that decision
-				rebuildQueue();
+			// TODO: improve that decision
+			this.rebuildQueue();
 
-				if (getNextIndexToPump(false) == null)
-				{
-					for (int y = yCoord - 1; y > 0; --y)
+			if (this.getNextIndexToPump(false) == null)
+				for (int y = this.yCoord - 1; y > 0; --y)
+					if (this.isPumpableFluid(this.xCoord, y, this.zCoord))
 					{
-						if (isPumpableFluid(xCoord, y, zCoord))
-						{
-							aimY = y;
-							return;
-						}
-						else if (isBlocked(xCoord, y, zCoord))
-						{
-							return;
-						}
+						this.aimY = y;
+						return;
 					}
-				}
-			}
+					else if (this.isBlocked(this.xCoord, y, this.zCoord))
+						return;
 		}
 	}
 
 	public void onNeighborBlockChange(Block block)
 	{
-		boolean p = worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
+		boolean p = this.worldObj.isBlockIndirectlyGettingPowered(this.xCoord, this.yCoord, this.zCoord);
 
-		if (powered != p)
+		if (this.powered != p)
 		{
-			powered = p;
+			this.powered = p;
 
-			if (!worldObj.isRemote)
-			{
-				sendNetworkUpdate();
-			}
+			if (!this.worldObj.isRemote)
+				this.sendNetworkUpdate();
 		}
 	}
 
 	private boolean isBlocked(int x, int y, int z)
 	{
-		Material mat = BlockUtils.getBlock(worldObj, x, y, z).getMaterial();
+		Material mat = BlockUtils.getBlock(this.worldObj, x, y, z).getMaterial();
 		return mat.blocksMovement();
 	}
 
 	private void pushToConsumers()
 	{
-		if (cache == null)
-		{
-			cache = TileBuffer.makeBuffer(worldObj, xCoord, yCoord, zCoord, false);
-		}
+		if (this.cache == null)
+			this.cache = TileBuffer.makeBuffer(this.worldObj, this.xCoord, this.yCoord, this.zCoord, false);
 
-		TankUtils.pushFluidToConsumers(tank, 400, cache);
+		TankUtils.pushFluidToConsumers(this.tank, 400, this.cache);
 	}
 
 	private void createTube()
 	{
-		if (tube == null)
+		if (this.tube == null)
 		{
-			tube = FactoryProxy.proxy.newPumpTube(worldObj);
+			this.tube = FactoryProxy.proxy.newPumpTube(this.worldObj);
 
-			if (!Double.isNaN(tubeY))
-			{
-				tube.posY = tubeY;
-			}
+			if (!Double.isNaN(this.tubeY))
+				this.tube.posY = this.tubeY;
 			else
-			{
-				tube.posY = yCoord;
-			}
+				this.tube.posY = this.yCoord;
 
-			tubeY = tube.posY;
+			this.tubeY = this.tube.posY;
 
-			if (aimY == 0)
-			{
-				aimY = yCoord;
-			}
+			if (this.aimY == 0)
+				this.aimY = this.yCoord;
 
-			setTubePosition();
+			this.setTubePosition();
 
-			worldObj.spawnEntityInWorld(tube);
+			this.worldObj.spawnEntityInWorld(this.tube);
 
-			if (!worldObj.isRemote)
-			{
-				sendNetworkUpdate();
-			}
+			if (!this.worldObj.isRemote)
+				this.sendNetworkUpdate();
 		}
 	}
 
 	private void destroyTube()
 	{
-		if (tube != null)
+		if (this.tube != null)
 		{
-			CoreProxy.proxy.removeEntity(tube);
-			tube = null;
-			tubeY = Double.NaN;
-			aimY = 0;
+			CoreProxy.proxy.removeEntity(this.tube);
+			this.tube = null;
+			this.tubeY = Double.NaN;
+			this.aimY = 0;
 		}
 	}
 
 	private BlockIndex getNextIndexToPump(boolean remove)
 	{
-		if (pumpLayerQueues.isEmpty())
+		if (this.pumpLayerQueues.isEmpty())
 		{
-			if (timer.markTimeIfDelay(worldObj))
-			{
-				rebuildQueue();
-			}
+			if (this.timer.markTimeIfDelay(this.worldObj))
+				this.rebuildQueue();
 
 			return null;
 		}
 
-		Deque<BlockIndex> topLayer = pumpLayerQueues.lastEntry().getValue();
+		Deque<BlockIndex> topLayer = this.pumpLayerQueues.lastEntry().getValue();
 
 		if (topLayer != null)
 		{
 			if (topLayer.isEmpty())
-			{
-				pumpLayerQueues.pollLastEntry();
-			}
+				this.pumpLayerQueues.pollLastEntry();
 
 			if (remove)
 			{
@@ -275,24 +237,20 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 				return index;
 			}
 			else
-			{
 				return topLayer.peekLast();
-			}
 		}
 		else
-		{
 			return null;
-		}
 	}
 
 	private Deque<BlockIndex> getLayerQueue(int layer)
 	{
-		Deque<BlockIndex> pumpQueue = pumpLayerQueues.get(layer);
+		Deque<BlockIndex> pumpQueue = this.pumpLayerQueues.get(layer);
 
 		if (pumpQueue == null)
 		{
 			pumpQueue = new LinkedList<BlockIndex>();
-			pumpLayerQueues.put(layer, pumpQueue);
+			this.pumpLayerQueues.put(layer, pumpQueue);
 		}
 
 		return pumpQueue;
@@ -300,27 +258,23 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 	public void rebuildQueue()
 	{
-		numFluidBlocksFound = 0;
-		pumpLayerQueues.clear();
-		int x = xCoord;
-		int y = aimY;
-		int z = zCoord;
-		Fluid pumpingFluid = BlockUtils.getFluid(BlockUtils.getBlock(worldObj, x, y, z));
+		this.numFluidBlocksFound = 0;
+		this.pumpLayerQueues.clear();
+		int x = this.xCoord;
+		int y = this.aimY;
+		int z = this.zCoord;
+		Fluid pumpingFluid = BlockUtils.getFluid(BlockUtils.getBlock(this.worldObj, x, y, z));
 
 		if (pumpingFluid == null)
-		{
 			return;
-		}
 
-		if (pumpingFluid != tank.getAcceptedFluid() && tank.getAcceptedFluid() != null)
-		{
+		if (pumpingFluid != this.tank.getAcceptedFluid() && this.tank.getAcceptedFluid() != null)
 			return;
-		}
 
 		Set<BlockIndex> visitedBlocks = new HashSet<BlockIndex>();
 		Deque<BlockIndex> fluidsFound = new LinkedList<BlockIndex>();
 
-		queueForPumping(x, y, z, visitedBlocks, fluidsFound, pumpingFluid);
+		this.queueForPumping(x, y, z, visitedBlocks, fluidsFound, pumpingFluid);
 
 		//		long timeoutTime = System.nanoTime() + 10000;
 
@@ -331,16 +285,14 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 			for (BlockIndex index : fluidsToExpand)
 			{
-				queueForPumping(index.x, index.y + 1, index.z, visitedBlocks, fluidsFound, pumpingFluid);
-				queueForPumping(index.x + 1, index.y, index.z, visitedBlocks, fluidsFound, pumpingFluid);
-				queueForPumping(index.x - 1, index.y, index.z, visitedBlocks, fluidsFound, pumpingFluid);
-				queueForPumping(index.x, index.y, index.z + 1, visitedBlocks, fluidsFound, pumpingFluid);
-				queueForPumping(index.x, index.y, index.z - 1, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x, index.y + 1, index.z, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x + 1, index.y, index.z, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x - 1, index.y, index.z, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x, index.y, index.z + 1, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x, index.y, index.z - 1, visitedBlocks, fluidsFound, pumpingFluid);
 
-				if (pumpingFluid == FluidRegistry.WATER && !BuildCraftCore.consumeWaterSources && numFluidBlocksFound >= 9)
-				{
+				if (pumpingFluid == FluidRegistry.WATER && !BuildCraftCore.consumeWaterSources && this.numFluidBlocksFound >= 9)
 					return;
-				}
 
 				//				if (System.nanoTime() > timeoutTime)
 				//					return;
@@ -353,66 +305,50 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 		BlockIndex index = new BlockIndex(x, y, z);
 		if (visitedBlocks.add(index))
 		{
-			if ((x - xCoord) * (x - xCoord) + (z - zCoord) * (z - zCoord) > 64 * 64)
-			{
+			if ((x - this.xCoord) * (x - this.xCoord) + (z - this.zCoord) * (z - this.zCoord) > 64 * 64)
 				return;
-			}
 
-			Block block = BlockUtils.getBlock(worldObj, x, y, z);
+			Block block = BlockUtils.getBlock(this.worldObj, x, y, z);
 
 			if (BlockUtils.getFluid(block) == pumpingFluid)
-			{
 				fluidsFound.add(index);
-			}
 
-			if (canDrainBlock(block, x, y, z, pumpingFluid))
+			if (this.canDrainBlock(block, x, y, z, pumpingFluid))
 			{
-				getLayerQueue(y).add(index);
-				numFluidBlocksFound++;
+				this.getLayerQueue(y).add(index);
+				this.numFluidBlocksFound++;
 			}
 		}
 	}
 
 	private boolean isPumpableFluid(int x, int y, int z)
 	{
-		Fluid fluid = BlockUtils.getFluid(BlockUtils.getBlock(worldObj, x, y, z));
+		Fluid fluid = BlockUtils.getFluid(BlockUtils.getBlock(this.worldObj, x, y, z));
 
 		if (fluid == null)
-		{
 			return false;
-		}
-		else if (!isFluidAllowed(fluid))
-		{
+		else if (!this.isFluidAllowed(fluid))
 			return false;
-		}
 		else
-		{
-			return !(tank.getAcceptedFluid() != null && tank.getAcceptedFluid() != fluid);
-		}
+			return !(this.tank.getAcceptedFluid() != null && this.tank.getAcceptedFluid() != fluid);
 	}
 
 	private boolean canDrainBlock(Block block, int x, int y, int z, Fluid fluid)
 	{
-		if (!isFluidAllowed(fluid))
-		{
+		if (!this.isFluidAllowed(fluid))
 			return false;
-		}
 
-		FluidStack fluidStack = BlockUtils.drainBlock(block, worldObj, x, y, z, false);
+		FluidStack fluidStack = BlockUtils.drainBlock(block, this.worldObj, x, y, z, false);
 
 		if (fluidStack == null || fluidStack.amount <= 0)
-		{
 			return false;
-		}
 		else
-		{
 			return fluidStack.getFluid() == fluid;
-		}
 	}
 
 	private boolean isFluidAllowed(Fluid fluid)
 	{
-		return BuildCraftFactory.pumpDimensionList.isFluidAllowed(fluid, worldObj.provider.dimensionId);
+		return BuildCraftFactory.pumpDimensionList.isFluidAllowed(fluid, this.worldObj.provider.dimensionId);
 	}
 
 	@Override
@@ -420,12 +356,12 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	{
 		super.readFromNBT(data);
 
-		tank.readFromNBT(data);
+		this.tank.readFromNBT(data);
 
-		powered = data.getBoolean("powered");
+		this.powered = data.getBoolean("powered");
 
-		aimY = data.getInteger("aimY");
-		tubeY = data.getFloat("tubeY");
+		this.aimY = data.getInteger("aimY");
+		this.tubeY = data.getFloat("tubeY");
 	}
 
 	@Override
@@ -433,73 +369,65 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	{
 		super.writeToNBT(data);
 
-		tank.writeToNBT(data);
+		this.tank.writeToNBT(data);
 
-		data.setBoolean("powered", powered);
+		data.setBoolean("powered", this.powered);
 
-		data.setInteger("aimY", aimY);
+		data.setInteger("aimY", this.aimY);
 
-		if (tube != null)
-		{
-			data.setFloat("tubeY", (float) tube.posY);
-		}
+		if (this.tube != null)
+			data.setFloat("tubeY", (float) this.tube.posY);
 		else
-		{
-			data.setFloat("tubeY", yCoord);
-		}
+			data.setFloat("tubeY", this.yCoord);
 	}
 
 	@Override
 	public boolean hasWork()
 	{
-		BlockIndex next = getNextIndexToPump(false);
+		BlockIndex next = this.getNextIndexToPump(false);
 
 		if (next != null)
-		{
-			return isPumpableFluid(next.x, next.y, next.z);
-		}
+			return this.isPumpableFluid(next.x, next.y, next.z);
 		else
-		{
 			return false;
-		}
 	}
 
 	@Override
 	public void writeData(ByteBuf buf)
 	{
-		buf.writeShort(aimY);
-		buf.writeFloat((float) tubeY);
-		buf.writeBoolean(powered);
-		ledState = ((tick - tickPumped) < 48 ? 16 : 0) | (getBattery().getEnergyStored() * 15 / getBattery().getMaxEnergyStored());
-		buf.writeByte(ledState);
+		buf.writeShort(this.aimY);
+		buf.writeFloat((float) this.tubeY);
+		buf.writeBoolean(this.powered);
+		this.ledState = (this.tick - this.tickPumped < 48 ? 16 : 0) | this.getBattery().getEnergyStored() * 15 / this.getBattery().getMaxEnergyStored();
+		buf.writeByte(this.ledState);
 	}
 
 	@Override
 	public void readData(ByteBuf data)
 	{
-		aimY = data.readShort();
-		tubeY = data.readFloat();
-		powered = data.readBoolean();
+		this.aimY = data.readShort();
+		this.tubeY = data.readFloat();
+		this.powered = data.readBoolean();
 
 		int newLedState = data.readUnsignedByte();
-		if (newLedState != ledState)
+		if (newLedState != this.ledState)
 		{
-			ledState = newLedState;
-			worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+			this.ledState = newLedState;
+			this.worldObj.markBlockRangeForRenderUpdate(this.xCoord, this.yCoord, this.zCoord, this.xCoord, this.yCoord, this.zCoord);
 		}
 
-		setTubePosition();
+		this.setTubePosition();
 	}
 
 	private void setTubePosition()
 	{
-		if (tube != null)
+		if (this.tube != null)
 		{
-			tube.iSize = CoreConstants.PIPE_MAX_POS - CoreConstants.PIPE_MIN_POS;
-			tube.kSize = CoreConstants.PIPE_MAX_POS - CoreConstants.PIPE_MIN_POS;
-			tube.jSize = yCoord - tube.posY;
+			this.tube.iSize = CoreConstants.PIPE_MAX_POS - CoreConstants.PIPE_MIN_POS;
+			this.tube.kSize = CoreConstants.PIPE_MAX_POS - CoreConstants.PIPE_MIN_POS;
+			this.tube.jSize = this.yCoord - this.tube.posY;
 
-			tube.setPosition(xCoord + CoreConstants.PIPE_MIN_POS, tubeY, zCoord + CoreConstants.PIPE_MIN_POS);
+			this.tube.setPosition(this.xCoord + CoreConstants.PIPE_MIN_POS, this.tubeY, this.zCoord + CoreConstants.PIPE_MIN_POS);
 		}
 	}
 
@@ -507,7 +435,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	public void invalidate()
 	{
 		super.invalidate();
-		destroy();
+		this.destroy();
 	}
 
 	@Override
@@ -515,11 +443,11 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	{
 		super.onChunkUnload();
 
-		if (tube != null)
+		if (this.tube != null)
 		{
 			// Remove the entity to stop it from piling up.
-			CoreProxy.proxy.removeEntity(tube);
-			tube = null;
+			CoreProxy.proxy.removeEntity(this.tube);
+			this.tube = null;
 		}
 	}
 
@@ -532,8 +460,8 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	@Override
 	public void destroy()
 	{
-		pumpLayerQueues.clear();
-		destroyTube();
+		this.pumpLayerQueues.clear();
+		this.destroyTube();
 	}
 
 	// IFluidHandler implementation.
@@ -547,24 +475,18 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	@Override
 	public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain)
 	{
-		return tank.drain(maxDrain, doDrain);
+		return this.tank.drain(maxDrain, doDrain);
 	}
 
 	@Override
 	public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain)
 	{
 		if (resource == null)
-		{
 			return null;
-		}
-		else if (!resource.isFluidEqual(tank.getFluid()))
-		{
+		else if (!resource.isFluidEqual(this.tank.getFluid()))
 			return null;
-		}
 		else
-		{
-			return drain(from, resource.amount, doDrain);
-		}
+			return this.drain(from, resource.amount, doDrain);
 	}
 
 	@Override
@@ -582,7 +504,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	@Override
 	public FluidTankInfo[] getTankInfo(ForgeDirection from)
 	{
-		return new FluidTankInfo[] { tank.getInfo() };
+		return new FluidTankInfo[] { this.tank.getInfo() };
 	}
 
 	@Override
@@ -595,12 +517,8 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	public int getLEDLevel(int led)
 	{
 		if (led == 0)
-		{ // Red LED
-			return ledState & 15;
-		}
+			return this.ledState & 15;
 		else
-		{ // Green LED
-			return (ledState >> 4) > 0 ? 15 : 0;
-		}
+			return this.ledState >> 4 > 0 ? 15 : 0;
 	}
 }

@@ -51,82 +51,70 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 	{
 		super.updateEntity();
 
-		if (worldObj.isRemote)
-		{
+		if (this.worldObj.isRemote)
 			return;
-		}
 
-		if (updateTracker.markTimeIfDelay(worldObj))
+		if (this.updateTracker.markTimeIfDelay(this.worldObj))
+			this.sendNetworkUpdate();
+
+		this.ticksSinceAction++;
+
+		if (this.mode == Mode.Off)
 		{
-			sendNetworkUpdate();
-		}
-
-		ticksSinceAction++;
-
-		if (mode == Mode.Off)
-		{
-			if (miner != null)
+			if (this.miner != null)
 			{
-				miner.invalidate();
-				miner = null;
+				this.miner.invalidate();
+				this.miner = null;
 			}
-			isDigging = false;
+			this.isDigging = false;
 			return;
 		}
 
-		if (getBattery().getEnergyStored() == 0)
-		{
+		if (this.getBattery().getEnergyStored() == 0)
 			return;
-		}
 
-		if (miner == null)
+		if (this.miner == null)
 		{
-			World world = worldObj;
+			World world = this.worldObj;
 
-			int depth = yCoord - 1;
+			int depth = this.yCoord - 1;
 
-			while (world.getBlock(xCoord, depth, zCoord) == BuildCraftFactory.plainPipeBlock)
-			{
+			while (world.getBlock(this.xCoord, depth, this.zCoord) == BuildCraftFactory.plainPipeBlock)
 				depth = depth - 1;
-			}
 
-			if (depth < 1 || depth < yCoord - BuildCraftFactory.miningDepth || !BlockUtils.canChangeBlock(world, xCoord, depth, zCoord))
+			if (depth < 1 || depth < this.yCoord - BuildCraftFactory.miningDepth || !BlockUtils.canChangeBlock(world, this.xCoord, depth, this.zCoord))
 			{
-				isDigging = false;
+				this.isDigging = false;
 				// Drain energy, because at 0 energy this will stop doing calculations.
-				getBattery().useEnergy(0, 10, false);
+				this.getBattery().useEnergy(0, 10, false);
 				return;
 			}
 
-			if (world.isAirBlock(xCoord, depth, zCoord) || world.getBlock(xCoord, depth, zCoord).isReplaceable(world, xCoord, depth, zCoord))
+			if (world.isAirBlock(this.xCoord, depth, this.zCoord) || world.getBlock(this.xCoord, depth, this.zCoord).isReplaceable(world, this.xCoord, depth, this.zCoord))
 			{
-				ticksSinceAction = 0;
+				this.ticksSinceAction = 0;
 				// TODO gamerforEA code start
-				if (!FakePlayerUtils.cantBreak(this.getOwnerFake(), xCoord, depth, zCoord))
-				// TODO gamerforEA code end
-				world.setBlock(xCoord, depth, zCoord, BuildCraftFactory.plainPipeBlock);
+				if (!FakePlayerUtils.cantBreak(this.getOwnerFake(), this.xCoord, depth, this.zCoord))
+					// TODO gamerforEA code end
+					world.setBlock(this.xCoord, depth, this.zCoord, BuildCraftFactory.plainPipeBlock);
 			}
 			else
-			{
-				miner = new BlockMiner(world, this, xCoord, depth, zCoord);
-			}
+				this.miner = new BlockMiner(world, this, this.xCoord, depth, this.zCoord);
 		}
 
-		if (miner != null)
+		if (this.miner != null)
 		{
-			isDigging = true;
-			ticksSinceAction = 0;
+			this.isDigging = true;
+			this.ticksSinceAction = 0;
 
-			int usedEnergy = miner.acceptEnergy(getBattery().getEnergyStored());
-			getBattery().useEnergy(usedEnergy, usedEnergy, false);
+			int usedEnergy = this.miner.acceptEnergy(this.getBattery().getEnergyStored());
+			this.getBattery().useEnergy(usedEnergy, usedEnergy, false);
 
-			if (miner.hasMined())
+			if (this.miner.hasMined())
 			{
-				if (miner.hasFailed())
-				{
-					isDigging = false;
-				}
-				miner = null;
+				if (this.miner.hasFailed())
+					this.isDigging = false;
+				this.miner = null;
 			}
 		}
 	}
@@ -135,14 +123,10 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 	public void invalidate()
 	{
 		super.invalidate();
-		if (miner != null)
-		{
-			miner.invalidate();
-		}
-		if (worldObj != null && yCoord > 2)
-		{
-			BuildCraftFactory.miningWellBlock.removePipes(worldObj, xCoord, yCoord, zCoord);
-		}
+		if (this.miner != null)
+			this.miner.invalidate();
+		if (this.worldObj != null && this.yCoord > 2)
+			BuildCraftFactory.miningWellBlock.removePipes(this.worldObj, this.xCoord, this.yCoord, this.zCoord);
 	}
 
 	@Override
@@ -150,8 +134,8 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 	{
 		super.writeData(stream);
 
-		ledState = (ticksSinceAction < 2 ? 16 : 0) | (getBattery().getEnergyStored() * 15 / getBattery().getMaxEnergyStored());
-		stream.writeByte(ledState);
+		this.ledState = (this.ticksSinceAction < 2 ? 16 : 0) | this.getBattery().getEnergyStored() * 15 / this.getBattery().getMaxEnergyStored();
+		stream.writeByte(this.ledState);
 	}
 
 	@Override
@@ -160,26 +144,22 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 		super.readData(stream);
 
 		int newLedState = stream.readUnsignedByte();
-		if (newLedState != ledState)
+		if (newLedState != this.ledState)
 		{
-			ledState = newLedState;
-			worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+			this.ledState = newLedState;
+			this.worldObj.markBlockRangeForRenderUpdate(this.xCoord, this.yCoord, this.zCoord, this.xCoord, this.yCoord, this.zCoord);
 		}
 	}
 
 	@Override
 	public boolean hasWork()
 	{
-		return isDigging;
+		return this.isDigging;
 	}
 
 	@Override
 	public ConnectOverride overridePipeConnection(IPipeTile.PipeType type, ForgeDirection with)
 	{
-		if (with.ordinal() == worldObj.getBlockMetadata(xCoord, yCoord, zCoord))
-		{
-			return ConnectOverride.DISCONNECT;
-		}
 		return type == IPipeTile.PipeType.ITEM ? ConnectOverride.CONNECT : ConnectOverride.DEFAULT;
 	}
 
@@ -193,12 +173,8 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 	public int getLEDLevel(int led)
 	{
 		if (led == 0)
-		{ // Red LED
-			return ledState & 15;
-		}
+			return this.ledState & 15;
 		else
-		{ // Green LED
-			return (ledState >> 4) > 0 ? 15 : 0;
-		}
+			return this.ledState >> 4 > 0 ? 15 : 0;
 	}
 }

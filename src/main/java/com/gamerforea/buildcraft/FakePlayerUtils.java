@@ -29,7 +29,7 @@ public final class FakePlayerUtils
 			Bukkit.getServer().getPluginManager().callEvent(event);
 			return event.getBukkitEvent().isCancelled();
 		}
-		catch (Exception e)
+		catch (Throwable throwable)
 		{
 			GameProfile profile = player.getGameProfile();
 			System.err.println(String.format("Failed call CauldronBlockBreakEvent [Name: %s, UUID: %s, X: %d, Y: %d, Z: %d]", profile.getName(), profile.getId().toString(), x, y, z));
@@ -45,7 +45,7 @@ public final class FakePlayerUtils
 			Bukkit.getServer().getPluginManager().callEvent(event);
 			return event.getBukkitEvent().isCancelled();
 		}
-		catch (Exception e)
+		catch (Throwable throwable)
 		{
 			System.err.println(String.format("Failed call CauldronEntityDamageByEntityEvent [Damager UUID: %s, Damagee UUID: %s]", damager.getUniqueID().toString(), damagee.getUniqueID().toString()));
 			return true;

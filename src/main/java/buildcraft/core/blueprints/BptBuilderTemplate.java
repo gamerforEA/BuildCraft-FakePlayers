@@ -45,26 +45,21 @@ public class BptBuilderTemplate extends BptBuilderBase
 	@Override
 	protected void internalInit()
 	{
-		if (blueprint.excavate)
-		{
-			for (int j = blueprint.sizeY - 1; j >= 0; --j)
-			{
-				for (int i = 0; i < blueprint.sizeX; ++i)
-				{
-					for (int k = 0; k < blueprint.sizeZ; ++k)
+		if (this.blueprint.excavate)
+			for (int j = this.blueprint.sizeY - 1; j >= 0; --j)
+				for (int i = 0; i < this.blueprint.sizeX; ++i)
+					for (int k = 0; k < this.blueprint.sizeZ; ++k)
 					{
-						int xCoord = i + x - blueprint.anchorX;
-						int yCoord = j + y - blueprint.anchorY;
-						int zCoord = k + z - blueprint.anchorZ;
+						int xCoord = i + this.x - this.blueprint.anchorX;
+						int yCoord = j + this.y - this.blueprint.anchorY;
+						int zCoord = k + this.z - this.blueprint.anchorZ;
 
-						if (yCoord < 0 || yCoord >= context.world.getHeight())
-						{
+						if (yCoord < 0 || yCoord >= this.context.world.getHeight())
 							continue;
-						}
 
-						SchematicBlockBase slot = blueprint.get(i, j, k);
+						SchematicBlockBase slot = this.blueprint.get(i, j, k);
 
-						if (slot == null && !isLocationUsed(xCoord, yCoord, zCoord))
+						if (slot == null && !this.isLocationUsed(xCoord, yCoord, zCoord))
 						{
 							BuildingSlotBlock b = new BuildingSlotBlock();
 
@@ -75,31 +70,24 @@ public class BptBuilderTemplate extends BptBuilderBase
 							b.mode = Mode.ClearIfInvalid;
 							b.buildStage = 0;
 
-							clearList.add(b);
+							this.clearList.add(b);
 						}
 					}
-				}
-			}
-		}
 
-		for (int j = 0; j < blueprint.sizeY; ++j)
-		{
-			for (int i = 0; i < blueprint.sizeX; ++i)
-			{
-				for (int k = 0; k < blueprint.sizeZ; ++k)
+		for (int j = 0; j < this.blueprint.sizeY; ++j)
+			for (int i = 0; i < this.blueprint.sizeX; ++i)
+				for (int k = 0; k < this.blueprint.sizeZ; ++k)
 				{
-					int xCoord = i + x - blueprint.anchorX;
-					int yCoord = j + y - blueprint.anchorY;
-					int zCoord = k + z - blueprint.anchorZ;
+					int xCoord = i + this.x - this.blueprint.anchorX;
+					int yCoord = j + this.y - this.blueprint.anchorY;
+					int zCoord = k + this.z - this.blueprint.anchorZ;
 
-					if (yCoord < 0 || yCoord >= context.world.getHeight())
-					{
+					if (yCoord < 0 || yCoord >= this.context.world.getHeight())
 						continue;
-					}
 
-					SchematicBlockBase slot = blueprint.get(i, j, k);
+					SchematicBlockBase slot = this.blueprint.get(i, j, k);
 
-					if (slot != null && !isLocationUsed(xCoord, yCoord, zCoord))
+					if (slot != null && !this.isLocationUsed(xCoord, yCoord, zCoord))
 					{
 						BuildingSlotBlock b = new BuildingSlotBlock();
 
@@ -111,26 +99,20 @@ public class BptBuilderTemplate extends BptBuilderBase
 						b.mode = Mode.Build;
 						b.buildStage = 1;
 
-						buildList.add(b);
+						this.buildList.add(b);
 					}
 				}
-			}
-		}
 
-		iteratorBuild = new BuildingSlotIterator(buildList);
-		iteratorClear = new BuildingSlotIterator(clearList);
+		this.iteratorBuild = new BuildingSlotIterator(this.buildList);
+		this.iteratorClear = new BuildingSlotIterator(this.clearList);
 	}
 
 	private void checkDone()
 	{
-		if (buildList.size() == 0 && clearList.size() == 0)
-		{
-			done = true;
-		}
+		if (this.buildList.size() == 0 && this.clearList.size() == 0)
+			this.done = true;
 		else
-		{
-			done = false;
-		}
+			this.done = false;
 	}
 
 	@Override
@@ -142,20 +124,16 @@ public class BptBuilderTemplate extends BptBuilderBase
 	@Override
 	public BuildingSlot getNextBlock(World world, TileAbstractBuilder inv)
 	{
-		if (buildList.size() != 0 || clearList.size() != 0)
+		if (this.buildList.size() != 0 || this.clearList.size() != 0)
 		{
-			BuildingSlotBlock slot = internalGetNextBlock(world, inv);
-			checkDone();
+			BuildingSlotBlock slot = this.internalGetNextBlock(world, inv);
+			this.checkDone();
 
 			if (slot != null)
-			{
 				return slot;
-			}
 		}
 		else
-		{
-			checkDone();
-		}
+			this.checkDone();
 
 		return null;
 	}
@@ -169,9 +147,7 @@ public class BptBuilderTemplate extends BptBuilderBase
 		for (IInvSlot invSlot : InventoryIterator.getIterable(builder, ForgeDirection.UNKNOWN))
 		{
 			if (!builder.isBuildingMaterialSlot(invSlot.getIndex()))
-			{
 				continue;
-			}
 
 			ItemStack stack = invSlot.getStackInSlot();
 
@@ -183,64 +159,55 @@ public class BptBuilderTemplate extends BptBuilderBase
 		}
 
 		// Step 1: Check the cleared
-		iteratorClear.startIteration();
-		while (iteratorClear.hasNext())
+		this.iteratorClear.startIteration();
+		while (this.iteratorClear.hasNext())
 		{
-			BuildingSlotBlock slot = iteratorClear.next();
+			BuildingSlotBlock slot = this.iteratorClear.next();
 
-			if (slot.buildStage > clearList.getFirst().buildStage)
+			if (slot.buildStage > this.clearList.getFirst().buildStage)
 			{
-				iteratorClear.reset();
+				this.iteratorClear.reset();
 				break;
 			}
 
 			if (!world.blockExists(slot.x, slot.y, slot.z))
-			{
 				continue;
-			}
 
-			if (canDestroy(builder, context, slot))
-			{
-				// TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
+			if (this.canDestroy(builder, this.context, slot)) // TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
 				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || FakePlayerUtils.cantBreak(builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 				// TODO gamerforEA code end
 				{
-					iteratorClear.remove();
-					markLocationUsed(slot.x, slot.y, slot.z);
+					this.iteratorClear.remove();
+					this.markLocationUsed(slot.x, slot.y, slot.z);
 				}
 				else
 				{
-					consumeEnergyToDestroy(builder, slot);
-					createDestroyItems(slot);
+					this.consumeEnergyToDestroy(builder, slot);
+					this.createDestroyItems(slot);
 
 					result = slot;
-					iteratorClear.remove();
-					markLocationUsed(slot.x, slot.y, slot.z);
+					this.iteratorClear.remove();
+					this.markLocationUsed(slot.x, slot.y, slot.z);
 					break;
 				}
-			}
 		}
 
 		if (result != null)
-		{
 			return result;
-		}
 
 		// Step 2: Check the built, but only if we have anything to place and enough energy
 		if (firstSlotToConsume == null)
-		{
 			return null;
-		}
 
-		iteratorBuild.startIteration();
+		this.iteratorBuild.startIteration();
 
-		while (iteratorBuild.hasNext())
+		while (this.iteratorBuild.hasNext())
 		{
-			BuildingSlotBlock slot = iteratorBuild.next();
+			BuildingSlotBlock slot = this.iteratorBuild.next();
 
-			if (slot.buildStage > buildList.getFirst().buildStage)
+			if (slot.buildStage > this.buildList.getFirst().buildStage)
 			{
-				iteratorBuild.reset();
+				this.iteratorBuild.reset();
 				break;
 			}
 
@@ -248,15 +215,15 @@ public class BptBuilderTemplate extends BptBuilderBase
 			if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || FakePlayerUtils.cantBreak(builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), slot.x, slot.y, slot.z) || !BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 			// TODO gamerforEA code end
 			{
-				iteratorBuild.remove();
-				markLocationUsed(slot.x, slot.y, slot.z);
+				this.iteratorBuild.remove();
+				this.markLocationUsed(slot.x, slot.y, slot.z);
 			}
 			else if (builder.consumeEnergy(BuilderAPI.BUILD_ENERGY))
 			{
 				slot.addStackConsumed(firstSlotToConsume.decreaseStackInSlot(1));
 				result = slot;
-				iteratorBuild.remove();
-				markLocationUsed(slot.x, slot.y, slot.z);
+				this.iteratorBuild.remove();
+				this.markLocationUsed(slot.x, slot.y, slot.z);
 				break;
 			}
 		}

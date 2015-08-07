@@ -67,36 +67,36 @@ public abstract class BptBuilderBase implements IAreaProvider
 		this.y = y;
 		this.z = z;
 		this.usedLocations = new BitSet(bluePrint.sizeX * bluePrint.sizeY * bluePrint.sizeZ);
-		done = false;
+		this.done = false;
 
 		Box box = new Box();
 		box.initialize(this);
 
-		context = bluePrint.getContext(world, box);
+		this.context = bluePrint.getContext(world, box);
 	}
 
 	protected boolean isLocationUsed(int i, int j, int k)
 	{
-		int xCoord = i - x + blueprint.anchorX;
-		int yCoord = j - y + blueprint.anchorY;
-		int zCoord = k - z + blueprint.anchorZ;
-		return usedLocations.get((zCoord * blueprint.sizeY + yCoord) * blueprint.sizeX + xCoord);
+		int xCoord = i - this.x + this.blueprint.anchorX;
+		int yCoord = j - this.y + this.blueprint.anchorY;
+		int zCoord = k - this.z + this.blueprint.anchorZ;
+		return this.usedLocations.get((zCoord * this.blueprint.sizeY + yCoord) * this.blueprint.sizeX + xCoord);
 	}
 
 	protected void markLocationUsed(int i, int j, int k)
 	{
-		int xCoord = i - x + blueprint.anchorX;
-		int yCoord = j - y + blueprint.anchorY;
-		int zCoord = k - z + blueprint.anchorZ;
-		usedLocations.set((zCoord * blueprint.sizeY + yCoord) * blueprint.sizeX + xCoord, true);
+		int xCoord = i - this.x + this.blueprint.anchorX;
+		int yCoord = j - this.y + this.blueprint.anchorY;
+		int zCoord = k - this.z + this.blueprint.anchorZ;
+		this.usedLocations.set((zCoord * this.blueprint.sizeY + yCoord) * this.blueprint.sizeX + xCoord, true);
 	}
 
 	public void initialize()
 	{
-		if (!initialized)
+		if (!this.initialized)
 		{
-			internalInit();
-			initialized = true;
+			this.internalInit();
+			this.initialized = true;
 		}
 	}
 
@@ -108,29 +108,25 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public boolean buildNextSlot(World world, TileAbstractBuilder builder, double x, double y, double z)
 	{
-		initialize();
+		this.initialize();
 
-		if (world.getTotalWorldTime() < nextBuildDate)
-		{
+		if (world.getTotalWorldTime() < this.nextBuildDate)
 			return false;
-		}
 
-		BuildingSlot slot = getNextBlock(world, builder);
+		BuildingSlot slot = this.getNextBlock(world, builder);
 
-		if (buildSlot(world, builder, slot, x + 0.5F, y + 0.5F, z + 0.5F))
+		if (this.buildSlot(world, builder, slot, x + 0.5F, y + 0.5F, z + 0.5F))
 		{
-			nextBuildDate = world.getTotalWorldTime() + slot.buildTime();
+			this.nextBuildDate = world.getTotalWorldTime() + slot.buildTime();
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 
 	public boolean buildSlot(World world, IBuildingItemsProvider builder, BuildingSlot slot, double x, double y, double z)
 	{
-		initialize();
+		this.initialize();
 
 		if (slot != null)
 		{
@@ -139,14 +135,15 @@ public abstract class BptBuilderBase implements IAreaProvider
 			int xCoord = (int) slot.getDestination().x;
 			int yCoord = (int) slot.getDestination().y;
 			int zCoord = (int) slot.getDestination().z;
-			if (FakePlayerUtils.cantBreak(player, xCoord, yCoord, zCoord)) return false;
+			if (FakePlayerUtils.cantBreak(player, xCoord, yCoord, zCoord))
+				return false;
 			// TODO gamerforEA code end
 			slot.built = true;
 			BuildingItem i = new BuildingItem();
 			i.origin = new Position(x, y, z);
 			i.destination = slot.getDestination();
 			i.slotToBuild = slot;
-			i.context = getContext();
+			i.context = this.getContext();
 			i.setStacksToDisplay(slot.getStacksToDisplay());
 			builder.addAndLaunchBuildingItem(i);
 
@@ -158,45 +155,45 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public BuildingSlot reserveNextSlot(World world)
 	{
-		initialize();
+		this.initialize();
 
-		return reserveNextBlock(world);
+		return this.reserveNextBlock(world);
 	}
 
 	@Override
 	public int xMin()
 	{
-		return x - blueprint.anchorX;
+		return this.x - this.blueprint.anchorX;
 	}
 
 	@Override
 	public int yMin()
 	{
-		return y - blueprint.anchorY;
+		return this.y - this.blueprint.anchorY;
 	}
 
 	@Override
 	public int zMin()
 	{
-		return z - blueprint.anchorZ;
+		return this.z - this.blueprint.anchorZ;
 	}
 
 	@Override
 	public int xMax()
 	{
-		return x + blueprint.sizeX - blueprint.anchorX - 1;
+		return this.x + this.blueprint.sizeX - this.blueprint.anchorX - 1;
 	}
 
 	@Override
 	public int yMax()
 	{
-		return y + blueprint.sizeY - blueprint.anchorY - 1;
+		return this.y + this.blueprint.sizeY - this.blueprint.anchorY - 1;
 	}
 
 	@Override
 	public int zMax()
 	{
-		return z + blueprint.sizeZ - blueprint.anchorZ - 1;
+		return this.z + this.blueprint.sizeZ - this.blueprint.anchorZ - 1;
 	}
 
 	@Override
@@ -207,7 +204,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public AxisAlignedBB getBoundingBox()
 	{
-		return AxisAlignedBB.getBoundingBox(xMin(), yMin(), zMin(), xMax(), yMax(), zMax());
+		return AxisAlignedBB.getBoundingBox(this.xMin(), this.yMin(), this.zMin(), this.xMax(), this.yMax(), this.zMax());
 	}
 
 	public void postProcessing(World world)
@@ -217,37 +214,35 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public BptContext getContext()
 	{
-		return context;
+		return this.context;
 	}
 
 	public boolean isDone(IBuildingItemsProvider builder)
 	{
-		return done && builder.getBuilders().size() == 0;
+		return this.done && builder.getBuilders().size() == 0;
 	}
 
 	private int getBlockBreakEnergy(BuildingSlotBlock slot)
 	{
-		return BlockUtils.computeBlockBreakEnergy(context.world(), slot.x, slot.y, slot.z);
+		return BlockUtils.computeBlockBreakEnergy(this.context.world(), slot.x, slot.y, slot.z);
 	}
 
 	protected final boolean canDestroy(TileAbstractBuilder builder, IBuilderContext context, BuildingSlotBlock slot)
 	{
-		return builder.energyAvailable() >= getBlockBreakEnergy(slot);
+		return builder.energyAvailable() >= this.getBlockBreakEnergy(slot);
 	}
 
 	public void consumeEnergyToDestroy(TileAbstractBuilder builder, BuildingSlotBlock slot)
 	{
-		builder.consumeEnergy(getBlockBreakEnergy(slot));
+		builder.consumeEnergy(this.getBlockBreakEnergy(slot));
 	}
 
 	public void createDestroyItems(BuildingSlotBlock slot)
 	{
-		int hardness = (int) Math.ceil((double) getBlockBreakEnergy(slot) / BuilderAPI.BREAK_ENERGY);
+		int hardness = (int) Math.ceil((double) this.getBlockBreakEnergy(slot) / BuilderAPI.BREAK_ENERGY);
 
 		for (int i = 0; i < hardness; ++i)
-		{
 			slot.addStackConsumed(new ItemStack(BuildCraftCore.buildToolBlock));
-		}
 	}
 
 	public void useRequirements(IInventory inv, BuildingSlot slot)
@@ -256,7 +251,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 	public void saveBuildStateToNBT(NBTTagCompound nbt, IBuildingItemsProvider builder)
 	{
-		nbt.setByteArray("usedLocationList", BitSetUtils.toByteArray(usedLocations));
+		nbt.setByteArray("usedLocationList", BitSetUtils.toByteArray(this.usedLocations));
 
 		NBTTagList buildingList = new NBTTagList();
 
@@ -273,9 +268,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 	public void loadBuildStateToNBT(NBTTagCompound nbt, IBuildingItemsProvider builder)
 	{
 		if (nbt.hasKey("usedLocationList"))
-		{
-			usedLocations = BitSetUtils.fromByteArray(nbt.getByteArray("usedLocationList"));
-		}
+			this.usedLocations = BitSetUtils.fromByteArray(nbt.getByteArray("usedLocationList"));
 
 		NBTTagList buildingList = nbt.getTagList("buildersInAction", Constants.NBT.TAG_COMPOUND);
 
@@ -286,7 +279,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 			try
 			{
 				item.readFromNBT(buildingList.getCompoundTagAt(i));
-				item.context = getContext();
+				item.context = this.getContext();
 				builder.getBuilders().add(item);
 			}
 			catch (MappingNotFoundException e)
@@ -305,7 +298,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 			{
 				NBTTagCompound cpt = clearList.getCompoundTagAt(i);
 				BlockIndex o = new BlockIndex(cpt);
-				markLocationUsed(o.x, o.y, o.z);
+				this.markLocationUsed(o.x, o.y, o.z);
 			}
 		}
 
@@ -317,7 +310,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 			{
 				NBTTagCompound cpt = builtList.getCompoundTagAt(i);
 				BlockIndex o = new BlockIndex(cpt);
-				markLocationUsed(o.x, o.y, o.z);
+				this.markLocationUsed(o.x, o.y, o.z);
 			}
 		}
 	}

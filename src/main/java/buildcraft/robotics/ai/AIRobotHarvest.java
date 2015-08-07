@@ -29,46 +29,44 @@ public class AIRobotHarvest extends AIRobot
 	public AIRobotHarvest(EntityRobotBase iRobot, BlockIndex iBlockFound)
 	{
 		super(iRobot);
-		blockFound = iBlockFound;
+		this.blockFound = iBlockFound;
 	}
 
 	@Override
 	public void update()
 	{
-		if (blockFound == null)
+		if (this.blockFound == null)
 		{
-			setSuccess(false);
-			terminate();
+			this.setSuccess(false);
+			this.terminate();
 			return;
 		}
 
-		if (delay++ > 20)
+		if (this.delay++ > 20)
 		{
-			if (!BuildCraftAPI.getWorldProperty("harvestable").get(robot.worldObj, blockFound.x, blockFound.y, blockFound.z))
+			if (!BuildCraftAPI.getWorldProperty("harvestable").get(this.robot.worldObj, this.blockFound.x, this.blockFound.y, this.blockFound.z))
 			{
-				setSuccess(false);
-				terminate();
+				this.setSuccess(false);
+				this.terminate();
 				return;
 			}
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), blockFound.x, blockFound.y, blockFound.z))
+			if (FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), this.blockFound.x, this.blockFound.y, this.blockFound.z))
 			{
-				setSuccess(false);
-				terminate();
+				this.setSuccess(false);
+				this.terminate();
 				return;
 			}
 			// TODO gamerforEA code end
 			List<ItemStack> drops = new ArrayList<ItemStack>();
-			if (!CropManager.harvestCrop(robot.worldObj, blockFound.x, blockFound.y, blockFound.z, drops))
+			if (!CropManager.harvestCrop(this.robot.worldObj, this.blockFound.x, this.blockFound.y, this.blockFound.z, drops))
 			{
-				setSuccess(false);
-				terminate();
+				this.setSuccess(false);
+				this.terminate();
 				return;
 			}
 			for (ItemStack stack : drops)
-			{
-				BlockUtils.dropItem((WorldServer) robot.worldObj, MathHelper.floor_double(robot.posX), MathHelper.floor_double(robot.posY), MathHelper.floor_double(robot.posZ), 6000, stack);
-			}
+				BlockUtils.dropItem((WorldServer) this.robot.worldObj, MathHelper.floor_double(this.robot.posX), MathHelper.floor_double(this.robot.posY), MathHelper.floor_double(this.robot.posZ), 6000, stack);
 		}
 	}
 
@@ -83,10 +81,10 @@ public class AIRobotHarvest extends AIRobot
 	{
 		super.writeSelfToNBT(nbt);
 
-		if (blockFound != null)
+		if (this.blockFound != null)
 		{
 			NBTTagCompound sub = new NBTTagCompound();
-			blockFound.writeTo(sub);
+			this.blockFound.writeTo(sub);
 			nbt.setTag("blockFound", sub);
 		}
 	}
@@ -97,8 +95,6 @@ public class AIRobotHarvest extends AIRobot
 		super.loadSelfFromNBT(nbt);
 
 		if (nbt.hasKey("blockFound"))
-		{
-			blockFound = new BlockIndex(nbt.getCompoundTag("blockFound"));
-		}
+			this.blockFound = new BlockIndex(nbt.getCompoundTag("blockFound"));
 	}
 }

@@ -36,61 +36,57 @@ public class AIRobotUseToolOnBlock extends AIRobot
 	{
 		this(iRobot);
 
-		useToBlock = index;
+		this.useToBlock = index;
 	}
 
 	@Override
 	public void start()
 	{
-		robot.aimItemAt(useToBlock.x, useToBlock.y, useToBlock.z);
-		robot.setItemActive(true);
+		this.robot.aimItemAt(this.useToBlock.x, this.useToBlock.y, this.useToBlock.z);
+		this.robot.setItemActive(true);
 	}
 
 	@Override
 	public void update()
 	{
-		useCycles++;
+		this.useCycles++;
 
-		if (useCycles > 40)
+		if (this.useCycles > 40)
 		{
-			ItemStack stack = robot.getHeldItem();
+			ItemStack stack = this.robot.getHeldItem();
 
-			EntityPlayer player = CoreProxy.proxy.getBuildCraftPlayer((WorldServer) robot.worldObj).get();
+			EntityPlayer player = CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.robot.worldObj).get();
 			// TODO gamerforEA add condition
-			if (!FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), useToBlock.x, useToBlock.y, useToBlock.z) && BlockUtils.useItemOnBlock(robot.worldObj, player, stack, useToBlock.x, useToBlock.y, useToBlock.z, ForgeDirection.UP))
+			if (!FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), this.useToBlock.x, this.useToBlock.y, this.useToBlock.z) && BlockUtils.useItemOnBlock(this.robot.worldObj, player, stack, this.useToBlock.x, this.useToBlock.y, this.useToBlock.z, ForgeDirection.UP))
 			{
-				if (robot.getHeldItem().isItemStackDamageable())
+				if (this.robot.getHeldItem().isItemStackDamageable())
 				{
-					robot.getHeldItem().damageItem(1, robot);
+					this.robot.getHeldItem().damageItem(1, this.robot);
 
-					if (robot.getHeldItem().getItemDamage() >= robot.getHeldItem().getMaxDamage())
-					{
-						robot.setItemInUse(null);
-					}
+					if (this.robot.getHeldItem().getItemDamage() >= this.robot.getHeldItem().getMaxDamage())
+						this.robot.setItemInUse(null);
 				}
 				else
-				{
-					robot.setItemInUse(null);
-				}
+					this.robot.setItemInUse(null);
 			}
 			else
 			{
-				setSuccess(false);
-				if (!robot.getHeldItem().isItemStackDamageable())
+				this.setSuccess(false);
+				if (!this.robot.getHeldItem().isItemStackDamageable())
 				{
-					BlockUtils.dropItem((WorldServer) robot.worldObj, MathHelper.floor_double(robot.posX), MathHelper.floor_double(robot.posY), MathHelper.floor_double(robot.posZ), 6000, stack);
-					robot.setItemInUse(null);
+					BlockUtils.dropItem((WorldServer) this.robot.worldObj, MathHelper.floor_double(this.robot.posX), MathHelper.floor_double(this.robot.posY), MathHelper.floor_double(this.robot.posZ), 6000, stack);
+					this.robot.setItemInUse(null);
 				}
 			}
 
-			terminate();
+			this.terminate();
 		}
 	}
 
 	@Override
 	public void end()
 	{
-		robot.setItemActive(false);
+		this.robot.setItemActive(false);
 	}
 
 	@Override
@@ -110,10 +106,10 @@ public class AIRobotUseToolOnBlock extends AIRobot
 	{
 		super.writeSelfToNBT(nbt);
 
-		if (useToBlock != null)
+		if (this.useToBlock != null)
 		{
 			NBTTagCompound sub = new NBTTagCompound();
-			useToBlock.writeTo(sub);
+			this.useToBlock.writeTo(sub);
 			nbt.setTag("blockFound", sub);
 		}
 	}
@@ -124,8 +120,6 @@ public class AIRobotUseToolOnBlock extends AIRobot
 		super.loadSelfFromNBT(nbt);
 
 		if (nbt.hasKey("blockFound"))
-		{
-			useToBlock = new BlockIndex(nbt.getCompoundTag("blockFound"));
-		}
+			this.useToBlock = new BlockIndex(nbt.getCompoundTag("blockFound"));
 	}
 }

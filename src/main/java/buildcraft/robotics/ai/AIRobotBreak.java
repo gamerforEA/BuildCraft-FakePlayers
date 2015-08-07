@@ -42,82 +42,84 @@ public class AIRobotBreak extends AIRobot
 	{
 		this(iRobot);
 
-		blockToBreak = iBlockToBreak;
+		this.blockToBreak = iBlockToBreak;
 	}
 
 	@Override
 	public void start()
 	{
-		robot.aimItemAt(blockToBreak.x, blockToBreak.y, blockToBreak.z);
+		this.robot.aimItemAt(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
 
-		robot.setItemActive(true);
-		block = robot.worldObj.getBlock(blockToBreak.x, blockToBreak.y, blockToBreak.z);
-		meta = robot.worldObj.getBlockMetadata(blockToBreak.x, blockToBreak.y, blockToBreak.z);
-		hardness = block.getBlockHardness(robot.worldObj, blockToBreak.x, blockToBreak.y, blockToBreak.z);
-		speed = getBreakSpeed(robot, robot.getHeldItem(), block, meta);
+		this.robot.setItemActive(true);
+		this.block = this.robot.worldObj.getBlock(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+		this.meta = this.robot.worldObj.getBlockMetadata(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+		this.hardness = this.block.getBlockHardness(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+		this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
 	}
 
 	@Override
 	public void update()
 	{
-		if (block == null || block.isAir(robot.worldObj, blockToBreak.x, blockToBreak.y, blockToBreak.z))
+		if (this.block == null)
 		{
-			terminate();
-		}
-
-		if (hardness != 0)
-		{
-			blockDamage += speed / hardness / 30F;
-		}
-		else
-		{
-			// Instantly break the block
-			blockDamage = 1.1F;
-		}
-
-		if (blockDamage > 1.0F)
-		{
-			robot.worldObj.destroyBlockInWorldPartially(robot.getEntityId(), blockToBreak.x, blockToBreak.y, blockToBreak.z, -1);
-			blockDamage = 0;
-
-			if (robot.getHeldItem() != null)
+			this.block = this.robot.worldObj.getBlock(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+			if (this.block == null)
 			{
-				robot.getHeldItem().getItem().onBlockStartBreak(robot.getHeldItem(), blockToBreak.x, blockToBreak.y, blockToBreak.z, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) robot.worldObj).get());
+				this.setSuccess(false);
+				this.terminate();
+				return;
 			}
+			this.meta = this.robot.worldObj.getBlockMetadata(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+			this.hardness = this.block.getBlockHardness(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+			this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
+		}
+		if (this.block.isAir(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z))
+		{
+			this.setSuccess(false);
+			this.terminate();
+			return;
+		}
+
+		if (this.hardness != 0)
+			this.blockDamage += this.speed / this.hardness / 30F;
+		else // Instantly break the block
+			this.blockDamage = 1.1F;
+
+		if (this.blockDamage > 1.0F)
+		{
+			this.robot.worldObj.destroyBlockInWorldPartially(this.robot.getEntityId(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, -1);
+			this.blockDamage = 0;
+
+			if (this.robot.getHeldItem() != null)
+				this.robot.getHeldItem().getItem().onBlockStartBreak(this.robot.getHeldItem(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.robot.worldObj).get());
 
 			// TODO gamerforEA add condition
-			if (!FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), blockToBreak.x, blockToBreak.y, blockToBreak.z) && BlockUtils.breakBlock((WorldServer) robot.worldObj, blockToBreak.x, blockToBreak.y, blockToBreak.z, 6000))
+			if (!FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.breakBlock((WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, 6000))
 			{
-				robot.worldObj.playAuxSFXAtEntity(null, 2001, blockToBreak.x, blockToBreak.y, blockToBreak.z, Block.getIdFromBlock(block) + (meta << 12));
+				this.robot.worldObj.playAuxSFXAtEntity(null, 2001, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, Block.getIdFromBlock(this.block) + (this.meta << 12));
 
-				if (robot.getHeldItem() != null)
+				if (this.robot.getHeldItem() != null)
 				{
-					robot.getHeldItem().getItem().onBlockDestroyed(robot.getHeldItem(), robot.worldObj, block, blockToBreak.x, blockToBreak.y, blockToBreak.z, robot);
+					this.robot.getHeldItem().getItem().onBlockDestroyed(this.robot.getHeldItem(), this.robot.worldObj, this.block, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.robot);
 
-					if (robot.getHeldItem().getItemDamage() >= robot.getHeldItem().getMaxDamage())
-					{
-						robot.setItemInUse(null);
-					}
+					if (this.robot.getHeldItem().getItemDamage() >= this.robot.getHeldItem().getMaxDamage())
+						this.robot.setItemInUse(null);
 				}
 			}
 			else
-			{
-				setSuccess(false);
-			}
+				this.setSuccess(false);
 
-			terminate();
+			this.terminate();
 		}
 		else
-		{
-			robot.worldObj.destroyBlockInWorldPartially(robot.getEntityId(), blockToBreak.x, blockToBreak.y, blockToBreak.z, (int) (blockDamage * 10.0F) - 1);
-		}
+			this.robot.worldObj.destroyBlockInWorldPartially(this.robot.getEntityId(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, (int) (this.blockDamage * 10.0F) - 1);
 	}
 
 	@Override
 	public void end()
 	{
-		robot.setItemActive(false);
-		robot.worldObj.destroyBlockInWorldPartially(robot.getEntityId(), blockToBreak.x, blockToBreak.y, blockToBreak.z, -1);
+		this.robot.setItemActive(false);
+		this.robot.worldObj.destroyBlockInWorldPartially(this.robot.getEntityId(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, -1);
 	}
 
 	private float getBreakSpeed(EntityRobotBase robot, ItemStack usingItem, Block block, int meta)
@@ -136,13 +138,9 @@ public class AIRobotBreak extends AIRobot
 				boolean canHarvest = ForgeHooks.canToolHarvestBlock(block, meta, usingItem);
 
 				if (!canHarvest && f <= 1.0F)
-				{
 					f += f1 * 0.08F;
-				}
 				else
-				{
 					f += f1;
-				}
 			}
 		}
 
@@ -166,10 +164,10 @@ public class AIRobotBreak extends AIRobot
 	{
 		super.writeSelfToNBT(nbt);
 
-		if (blockToBreak != null)
+		if (this.blockToBreak != null)
 		{
 			NBTTagCompound sub = new NBTTagCompound();
-			blockToBreak.writeTo(sub);
+			this.blockToBreak.writeTo(sub);
 			nbt.setTag("blockToBreak", sub);
 		}
 	}
@@ -180,8 +178,6 @@ public class AIRobotBreak extends AIRobot
 		super.loadSelfFromNBT(nbt);
 
 		if (nbt.hasKey("blockToBreak"))
-		{
-			blockToBreak = new BlockIndex(nbt.getCompoundTag("blockToBreak"));
-		}
+			this.blockToBreak = new BlockIndex(nbt.getCompoundTag("blockToBreak"));
 	}
 }

@@ -31,58 +31,56 @@ public class AIRobotAttack extends AIRobot
 	{
 		this(iRobot);
 
-		target = iTarget;
+		this.target = iTarget;
 	}
 
 	@Override
 	public void preempt(AIRobot ai)
 	{
-		if (ai instanceof AIRobotGotoBlock)
-		{
-			// target may become null in the event of a load. In that case, just
+		if (ai instanceof AIRobotGotoBlock) // target may become null in the event of a load. In that case, just
 			// go to the expected location.
-			if (target != null && robot.getDistanceToEntity(target) <= 2.0)
+			if (this.target != null && this.robot.getDistanceToEntity(this.target) <= 2.0)
 			{
-				abortDelegateAI();
-				robot.setItemActive(true);
+				this.abortDelegateAI();
+				this.robot.setItemActive(true);
 			}
-		}
 	}
 
 	@Override
 	public void update()
 	{
-		if (target == null || target.isDead)
+		if (this.target == null || this.target.isDead)
 		{
-			terminate();
+			this.terminate();
 			return;
 		}
 
-		if (robot.getDistanceToEntity(target) > 2.0)
+		if (this.robot.getDistanceToEntity(this.target) > 2.0)
 		{
-			startDelegateAI(new AIRobotGotoBlock(robot, (int) Math.floor(target.posX), (int) Math.floor(target.posY), (int) Math.floor(target.posZ)));
-			robot.setItemActive(false);
+			this.startDelegateAI(new AIRobotGotoBlock(this.robot, (int) Math.floor(this.target.posX), (int) Math.floor(this.target.posY), (int) Math.floor(this.target.posZ)));
+			this.robot.setItemActive(false);
 
 			return;
 		}
 
-		delay++;
+		this.delay++;
 
-		if (delay > 20)
+		if (this.delay > 20)
 		{
-			delay = 0;
+			this.delay = 0;
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantDamage(this.robot.getOwnerFake(), this.target)) return;
+			if (FakePlayerUtils.cantDamage(this.robot.getOwnerFake(), this.target))
+				return;
 			// TODO gamerforEA code end
-			((EntityRobot) robot).attackTargetEntityWithCurrentItem(target);
-			robot.aimItemAt((int) Math.floor(target.posX), (int) Math.floor(target.posY), (int) Math.floor(target.posZ));
+			((EntityRobot) this.robot).attackTargetEntityWithCurrentItem(this.target);
+			this.robot.aimItemAt((int) Math.floor(this.target.posX), (int) Math.floor(this.target.posY), (int) Math.floor(this.target.posZ));
 		}
 	}
 
 	@Override
 	public void end()
 	{
-		robot.setItemActive(false);
+		this.robot.setItemActive(false);
 	}
 
 	@Override
@@ -91,10 +89,8 @@ public class AIRobotAttack extends AIRobot
 		if (ai instanceof AIRobotGotoBlock)
 		{
 			if (!ai.success())
-			{
-				robot.unreachableEntityDetected(target);
-			}
-			terminate();
+				this.robot.unreachableEntityDetected(this.target);
+			this.terminate();
 		}
 	}
 

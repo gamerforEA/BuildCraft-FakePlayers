@@ -69,49 +69,41 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	{
 		super.updateEntity();
 
-		if (worldObj.isRemote)
-		{
+		if (this.worldObj.isRemote)
 			return;
-		}
 
-		if (powered)
-		{
+		if (this.powered)
 			return;
-		}
 
-		tick++;
-		if (tick % 16 == 0)
+		this.tick++;
+		if (this.tick % 16 == 0)
 		{
-			FluidStack fluidtoFill = tank.drain(FluidContainerRegistry.BUCKET_VOLUME, false);
+			FluidStack fluidtoFill = this.tank.drain(FluidContainerRegistry.BUCKET_VOLUME, false);
 			if (fluidtoFill != null && fluidtoFill.amount == FluidContainerRegistry.BUCKET_VOLUME)
 			{
 				Fluid fluid = fluidtoFill.getFluid();
 				if (fluid == null || !fluid.canBePlacedInWorld())
+					return;
+
+				if (fluid == FluidRegistry.WATER && this.worldObj.provider.dimensionId == -1)
 				{
+					this.tank.drain(FluidContainerRegistry.BUCKET_VOLUME, true);
 					return;
 				}
 
-				if (fluid == FluidRegistry.WATER && worldObj.provider.dimensionId == -1)
+				if (this.tick % REBUILD_DELAY[this.rebuildDelay] == 0)
 				{
-					tank.drain(FluidContainerRegistry.BUCKET_VOLUME, true);
-					return;
+					this.rebuildDelay++;
+					if (this.rebuildDelay >= REBUILD_DELAY.length)
+						this.rebuildDelay = REBUILD_DELAY.length - 1;
+					this.rebuildQueue();
 				}
+				BlockIndex index = this.getNextIndexToFill(true);
 
-				if (tick % REBUILD_DELAY[rebuildDelay] == 0)
+				if (index != null && this.placeFluid(index.x, index.y, index.z, fluid))
 				{
-					rebuildDelay++;
-					if (rebuildDelay >= REBUILD_DELAY.length)
-					{
-						rebuildDelay = REBUILD_DELAY.length - 1;
-					}
-					rebuildQueue();
-				}
-				BlockIndex index = getNextIndexToFill(true);
-
-				if (index != null && placeFluid(index.x, index.y, index.z, fluid))
-				{
-					tank.drain(FluidContainerRegistry.BUCKET_VOLUME, true);
-					rebuildDelay = 0;
+					this.tank.drain(FluidContainerRegistry.BUCKET_VOLUME, true);
+					this.rebuildDelay = 0;
 				}
 			}
 		}
@@ -119,12 +111,13 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 
 	private boolean placeFluid(int x, int y, int z, Fluid fluid)
 	{
-		Block block = BlockUtils.getBlock(worldObj, x, y, z);
+		Block block = BlockUtils.getBlock(this.worldObj, x, y, z);
 
-		if (canPlaceFluidAt(block, x, y, z))
+		if (this.canPlaceFluidAt(block, x, y, z))
 		{
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(this.getOwnerFake(), x, y, z)) return false;
+			if (FakePlayerUtils.cantBreak(this.getOwnerFake(), x, y, z))
+				return false;
 			// TODO gamerforEA code end
 			boolean placed;
 			Block b = TankUtils.getFluidBlock(fluid, true);
@@ -132,17 +125,15 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 			if (b instanceof BlockFluidBase)
 			{
 				BlockFluidBase blockFluid = (BlockFluidBase) b;
-				placed = worldObj.setBlock(x, y, z, b, blockFluid.getMaxRenderHeightMeta(), 3);
+				placed = this.worldObj.setBlock(x, y, z, b, blockFluid.getMaxRenderHeightMeta(), 3);
 			}
 			else
-			{
-				placed = worldObj.setBlock(x, y, z, b);
-			}
+				placed = this.worldObj.setBlock(x, y, z, b);
 
 			if (placed)
 			{
-				queueAdjacent(x, y, z);
-				expandQueue();
+				this.queueAdjacent(x, y, z);
+				this.expandQueue();
 			}
 
 			return placed;
@@ -153,19 +144,15 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 
 	private BlockIndex getNextIndexToFill(boolean remove)
 	{
-		if (pumpLayerQueues.isEmpty())
-		{
+		if (this.pumpLayerQueues.isEmpty())
 			return null;
-		}
 
-		Deque<BlockIndex> bottomLayer = pumpLayerQueues.firstEntry().getValue();
+		Deque<BlockIndex> bottomLayer = this.pumpLayerQueues.firstEntry().getValue();
 
 		if (bottomLayer != null)
 		{
 			if (bottomLayer.isEmpty())
-			{
-				pumpLayerQueues.pollFirstEntry();
-			}
+				this.pumpLayerQueues.pollFirstEntry();
 			if (remove)
 			{
 				BlockIndex index = bottomLayer.pollFirst();
@@ -179,11 +166,11 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 
 	private Deque<BlockIndex> getLayerQueue(int layer)
 	{
-		Deque<BlockIndex> pumpQueue = pumpLayerQueues.get(layer);
+		Deque<BlockIndex> pumpQueue = this.pumpLayerQueues.get(layer);
 		if (pumpQueue == null)
 		{
 			pumpQueue = new LinkedList<BlockIndex>();
-			pumpLayerQueues.put(layer, pumpQueue);
+			this.pumpLayerQueues.put(layer, pumpQueue);
 		}
 		return pumpQueue;
 	}
@@ -193,90 +180,72 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	 */
 	void rebuildQueue()
 	{
-		pumpLayerQueues.clear();
-		visitedBlocks.clear();
-		fluidsFound.clear();
+		this.pumpLayerQueues.clear();
+		this.visitedBlocks.clear();
+		this.fluidsFound.clear();
 
-		queueAdjacent(xCoord, yCoord, zCoord);
+		this.queueAdjacent(this.xCoord, this.yCoord, this.zCoord);
 
-		expandQueue();
+		this.expandQueue();
 	}
 
 	private void expandQueue()
 	{
-		if (tank.getFluidType() == null)
-		{
+		if (this.tank.getFluidType() == null)
 			return;
-		}
-		while (!fluidsFound.isEmpty())
+		while (!this.fluidsFound.isEmpty())
 		{
-			Deque<BlockIndex> fluidsToExpand = fluidsFound;
-			fluidsFound = new LinkedList<BlockIndex>();
+			Deque<BlockIndex> fluidsToExpand = this.fluidsFound;
+			this.fluidsFound = new LinkedList<BlockIndex>();
 
 			for (BlockIndex index : fluidsToExpand)
-			{
-				queueAdjacent(index.x, index.y, index.z);
-			}
+				this.queueAdjacent(index.x, index.y, index.z);
 		}
 	}
 
 	public void queueAdjacent(int x, int y, int z)
 	{
-		if (tank.getFluidType() == null)
-		{
+		if (this.tank.getFluidType() == null)
 			return;
-		}
 		for (int i = 0; i < 6; i++)
-		{
-			if (i != 1 && !blockedSides[i])
+			if (i != 1 && !this.blockedSides[i])
 			{
 				ForgeDirection dir = ForgeDirection.getOrientation(i);
-				queueForFilling(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+				this.queueForFilling(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
 			}
-		}
 	}
 
 	public void queueForFilling(int x, int y, int z)
 	{
 		if (y < 0 || y > 255)
-		{
 			return;
-		}
 		BlockIndex index = new BlockIndex(x, y, z);
-		if (visitedBlocks.add(index))
+		if (this.visitedBlocks.add(index))
 		{
-			if ((x - xCoord) * (x - xCoord) + (z - zCoord) * (z - zCoord) > 64 * 64)
-			{
+			if ((x - this.xCoord) * (x - this.xCoord) + (z - this.zCoord) * (z - this.zCoord) > 64 * 64)
 				return;
-			}
 
-			Block block = BlockUtils.getBlock(worldObj, x, y, z);
-			if (BlockUtils.getFluid(block) == tank.getFluidType())
-			{
-				fluidsFound.add(index);
-			}
-			if (canPlaceFluidAt(block, x, y, z))
-			{
-				getLayerQueue(y).addLast(index);
-			}
+			Block block = BlockUtils.getBlock(this.worldObj, x, y, z);
+			if (BlockUtils.getFluid(block) == this.tank.getFluidType())
+				this.fluidsFound.add(index);
+			if (this.canPlaceFluidAt(block, x, y, z))
+				this.getLayerQueue(y).addLast(index);
 		}
 	}
 
 	private boolean canPlaceFluidAt(Block block, int x, int y, int z)
 	{
-		return BuildCraftAPI.isSoftBlock(worldObj, x, y, z) && !BlockUtils.isFullFluidBlock(block, worldObj, x, y, z);
+		return BuildCraftAPI.isSoftBlock(this.worldObj, x, y, z) && !BlockUtils.isFullFluidBlock(block, this.worldObj, x, y, z);
 	}
 
 	public void onNeighborBlockChange(Block block)
 	{
-		boolean p = worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord);
-		if (powered != p)
+		boolean p = this.worldObj.isBlockIndirectlyGettingPowered(this.xCoord, this.yCoord, this.zCoord);
+		if (this.powered != p)
 		{
-			powered = p;
+			this.powered = p;
 			if (!p)
-			{
-				rebuildQueue();
-			}
+				this.rebuildQueue();
 		}
 	}
 
@@ -284,29 +253,23 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	public void readFromNBT(NBTTagCompound data)
 	{
 		super.readFromNBT(data);
-		tank.readFromNBT(data);
-		rebuildDelay = data.getByte("rebuildDelay");
-		powered = data.getBoolean("powered");
+		this.tank.readFromNBT(data);
+		this.rebuildDelay = data.getByte("rebuildDelay");
+		this.powered = data.getBoolean("powered");
 		for (int i = 0; i < 6; i++)
-		{
-			blockedSides[i] = data.getBoolean("blocked[" + i + "]");
-		}
+			this.blockedSides[i] = data.getBoolean("blocked[" + i + "]");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound data)
 	{
 		super.writeToNBT(data);
-		tank.writeToNBT(data);
-		data.setByte("rebuildDelay", (byte) rebuildDelay);
-		data.setBoolean("powered", powered);
+		this.tank.writeToNBT(data);
+		data.setByte("rebuildDelay", (byte) this.rebuildDelay);
+		data.setBoolean("powered", this.powered);
 		for (int i = 0; i < 6; i++)
-		{
-			if (blockedSides[i])
-			{
+			if (this.blockedSides[i])
 				data.setBoolean("blocked[" + i + "]", true);
-			}
-		}
 	}
 
 	// TODO: fit in single byte
@@ -314,25 +277,25 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	public void readData(ByteBuf stream)
 	{
 		for (int i = 0; i < 6; i++)
-			blockedSides[i] = stream.readBoolean();
+			this.blockedSides[i] = stream.readBoolean();
 	}
 
 	@Override
 	public void writeData(ByteBuf stream)
 	{
 		for (int i = 0; i < 6; i++)
-			stream.writeBoolean(blockedSides[i]);
+			stream.writeBoolean(this.blockedSides[i]);
 	}
 
 	public void switchSide(ForgeDirection side)
 	{
 		if (side.ordinal() != 1)
 		{
-			blockedSides[side.ordinal()] = !blockedSides[side.ordinal()];
+			this.blockedSides[side.ordinal()] = !this.blockedSides[side.ordinal()];
 
-			rebuildQueue();
-			sendNetworkUpdate();
-			worldObj.markBlockRangeForRenderUpdate(xCoord, yCoord, zCoord, xCoord, yCoord, zCoord);
+			this.rebuildQueue();
+			this.sendNetworkUpdate();
+			this.worldObj.markBlockRangeForRenderUpdate(this.xCoord, this.yCoord, this.zCoord, this.xCoord, this.yCoord, this.zCoord);
 		}
 	}
 
@@ -340,20 +303,20 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	public void invalidate()
 	{
 		super.invalidate();
-		destroy();
+		this.destroy();
 	}
 
 	@Override
 	public void destroy()
 	{
-		pumpLayerQueues.clear();
+		this.pumpLayerQueues.clear();
 	}
 
 	// IFluidHandler implementation.
 	@Override
 	public int fill(ForgeDirection from, FluidStack resource, boolean doFill)
 	{
-		return tank.fill(resource, doFill);
+		return this.tank.fill(resource, doFill);
 	}
 
 	@Override
@@ -383,11 +346,11 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	@Override
 	public FluidTankInfo[] getTankInfo(ForgeDirection from)
 	{
-		return new FluidTankInfo[] { tank.getInfo() };
+		return new FluidTankInfo[] { this.tank.getInfo() };
 	}
 
 	public boolean isSideBlocked(int side)
 	{
-		return blockedSides[side];
+		return this.blockedSides[side];
 	}
 }

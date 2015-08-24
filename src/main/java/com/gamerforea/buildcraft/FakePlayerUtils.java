@@ -16,12 +16,12 @@ import net.minecraftforge.common.util.FakePlayerFactory;
 
 public final class FakePlayerUtils
 {
-	public static FakePlayer create(World world, GameProfile profile)
+	public static final FakePlayer create(World world, GameProfile profile)
 	{
 		return FakePlayerFactory.get((WorldServer) world, profile);
 	}
 
-	public static boolean cantBreak(EntityPlayer player, int x, int y, int z)
+	public static final boolean cantBreak(EntityPlayer player, int x, int y, int z)
 	{
 		try
 		{
@@ -37,7 +37,7 @@ public final class FakePlayerUtils
 		}
 	}
 
-	public static boolean cantDamage(Entity damager, Entity damagee)
+	public static final boolean cantDamage(Entity damager, Entity damagee)
 	{
 		try
 		{

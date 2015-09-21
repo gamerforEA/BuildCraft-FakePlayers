@@ -543,7 +543,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 				FluidStack fluidStack = fluid != null ? FluidContainerRegistry.getFluidForFilledItem(invStk) : null;
 				boolean compatibleContainer = fluidStack != null && fluidStack.getFluid() == fluid && fluidStack.amount >= FluidContainerRegistry.BUCKET_VOLUME;
 
-				if (StackHelper.isMatchingItem(reqStk, invStk, true, true) || compatibleContainer)
+				if (StackHelper.isEqualItem(reqStk, invStk) || compatibleContainer)
 				{
 					try
 					{
@@ -625,7 +625,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 				FluidStack fluidStack = fluid != null ? FluidContainerRegistry.getFluidForFilledItem(invStk) : null;
 				boolean fluidFound = fluidStack != null && fluidStack.getFluid() == fluid && fluidStack.amount >= FluidContainerRegistry.BUCKET_VOLUME;
 
-				if (fluidFound || StackHelper.isMatchingItem(reqStk, invStk, true, true))
+				if (fluidFound || StackHelper.isEqualItem(reqStk, invStk))
 				{
 					try
 					{

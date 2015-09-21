@@ -19,12 +19,12 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "7.0.21"
+version = "7.0.23"
 group= "com.mod-buildcraft"
 archivesBaseName = "buildcraft"
 
 minecraft {
-	version = "1.7.10-10.13.4.1490-1.7.10"
+	version = "1.7.10-10.13.4.1492-1.7.10"
 	runDir = "eclipse"
 }
 

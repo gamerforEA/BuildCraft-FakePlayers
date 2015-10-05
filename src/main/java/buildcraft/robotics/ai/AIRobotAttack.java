@@ -8,7 +8,7 @@
  */
 package buildcraft.robotics.ai;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.robots.AIRobot;
@@ -68,10 +68,12 @@ public class AIRobotAttack extends AIRobot
 		if (this.delay > 20)
 		{
 			this.delay = 0;
+
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantDamage(this.robot.getOwnerFake(), this.target))
+			if (EventUtils.cantDamage(this.robot.fake.getPlayer(), this.target))
 				return;
 			// TODO gamerforEA code end
+
 			((EntityRobot) this.robot).attackTargetEntityWithCurrentItem(this.target);
 			this.robot.aimItemAt((int) Math.floor(this.target.posX), (int) Math.floor(this.target.posY), (int) Math.floor(this.target.posZ));
 		}

@@ -10,7 +10,7 @@ package buildcraft.core.blueprints;
 
 import java.util.LinkedList;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.blueprints.SchematicBlockBase;
@@ -21,13 +21,10 @@ import buildcraft.core.builders.BuildingSlotBlock;
 import buildcraft.core.builders.BuildingSlotBlock.Mode;
 import buildcraft.core.builders.BuildingSlotIterator;
 import buildcraft.core.builders.TileAbstractBuilder;
-import buildcraft.core.lib.block.TileBuildCraft;
 import buildcraft.core.lib.inventory.InventoryIterator;
 import buildcraft.core.lib.utils.BlockUtils;
-import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
 
 public class BptBuilderTemplate extends BptBuilderBase
@@ -174,7 +171,7 @@ public class BptBuilderTemplate extends BptBuilderBase
 				continue;
 
 			if (this.canDestroy(builder, this.context, slot)) // TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
-				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || FakePlayerUtils.cantBreak(builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
+				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 				// TODO gamerforEA code end
 				{
 					this.iteratorClear.remove();
@@ -212,7 +209,7 @@ public class BptBuilderTemplate extends BptBuilderBase
 			}
 
 			// TODO gamerforEA condition replace, old code: isBlockPlaceCanceled(world, slot.x, slot.y, slot.z, slot.schematic)
-			if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || FakePlayerUtils.cantBreak(builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), slot.x, slot.y, slot.z) || !BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
+			if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z) || !BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 			// TODO gamerforEA code end
 			{
 				this.iteratorBuild.remove();

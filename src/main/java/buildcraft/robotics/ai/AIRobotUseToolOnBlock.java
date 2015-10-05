@@ -8,7 +8,7 @@
  */
 package buildcraft.robotics.ai;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.robots.AIRobot;
@@ -56,8 +56,8 @@ public class AIRobotUseToolOnBlock extends AIRobot
 			ItemStack stack = this.robot.getHeldItem();
 
 			EntityPlayer player = CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.robot.worldObj).get();
-			// TODO gamerforEA add condition
-			if (!FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), this.useToBlock.x, this.useToBlock.y, this.useToBlock.z) && BlockUtils.useItemOnBlock(this.robot.worldObj, player, stack, this.useToBlock.x, this.useToBlock.y, this.useToBlock.z, ForgeDirection.UP))
+			// TODO gamerforEA add condition [1]
+			if (!EventUtils.cantBreak(this.robot.fake.getPlayer(), this.useToBlock.x, this.useToBlock.y, this.useToBlock.z) && BlockUtils.useItemOnBlock(this.robot.worldObj, player, stack, this.useToBlock.x, this.useToBlock.y, this.useToBlock.z, ForgeDirection.UP))
 			{
 				if (this.robot.getHeldItem().isItemStackDamageable())
 				{

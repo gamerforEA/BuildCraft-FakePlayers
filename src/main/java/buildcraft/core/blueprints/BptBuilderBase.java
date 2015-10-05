@@ -12,7 +12,8 @@ import java.util.BitSet;
 
 import org.apache.logging.log4j.Level;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.BuilderAPI;
@@ -131,13 +132,14 @@ public abstract class BptBuilderBase implements IAreaProvider
 		if (slot != null)
 		{
 			// TODO gamerforEA code start
-			EntityPlayer player = builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get();
+			EntityPlayer player = builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).fake.getPlayer() : ModUtils.getModFake(world);
 			int xCoord = (int) slot.getDestination().x;
 			int yCoord = (int) slot.getDestination().y;
 			int zCoord = (int) slot.getDestination().z;
-			if (FakePlayerUtils.cantBreak(player, xCoord, yCoord, zCoord))
+			if (EventUtils.cantBreak(player, xCoord, yCoord, zCoord))
 				return false;
 			// TODO gamerforEA code end
+
 			slot.built = true;
 			BuildingItem i = new BuildingItem();
 			i.origin = new Position(x, y, z);

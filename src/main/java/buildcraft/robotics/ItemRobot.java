@@ -10,6 +10,8 @@ package buildcraft.robotics;
 
 import java.util.List;
 
+import com.gamerforea.buildcraft.ModUtils;
+
 import buildcraft.BuildCraftRobotics;
 import buildcraft.api.boards.RedstoneBoardNBT;
 import buildcraft.api.boards.RedstoneBoardRegistry;
@@ -20,7 +22,6 @@ import buildcraft.api.robots.EntityRobotBase;
 import buildcraft.core.BCCreativeTab;
 import buildcraft.core.lib.items.ItemBuildCraft;
 import buildcraft.core.lib.utils.NBTUtils;
-import buildcraft.core.proxy.CoreProxy;
 import buildcraft.transport.BlockGenericPipe;
 import buildcraft.transport.Pipe;
 import cofh.api.energy.IEnergyContainerItem;
@@ -37,7 +38,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 {
@@ -49,7 +49,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	// TODO gamerforEA code start
 	public EntityRobot createRobot(ItemStack stack, World world)
 	{
-		return this.createRobot(CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), stack, world);
+		return this.createRobot(ModUtils.getModFake(world), stack, world);
 	}
 	// TODO gamerforEA code end
 
@@ -64,9 +64,11 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 				return null;
 			EntityRobot robot = new EntityRobot(world, robotNBT);
 			robot.getBattery().setEnergy(getEnergy(nbt));
+
 			// TODO gamerforEA code start
-			robot.ownerProfile = player.getGameProfile();
+			robot.fake.profile = player.getGameProfile();
 			// TODO gamerforEA code end
+
 			return robot;
 		}
 		catch (Throwable e)
@@ -215,7 +217,9 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 					FMLCommonHandler.instance().bus().post(robotEvent);
 					if (robotEvent.isCanceled())
 						return true;
-					EntityRobot robot = ((ItemRobot) currentItem.getItem()).createRobot(player, currentItem, world); // TODO gamerforEA add EntityPlayer parameter
+
+					// TODO gamerforEA add EntityPlayer parameter
+					EntityRobot robot = ((ItemRobot) currentItem.getItem()).createRobot(player, currentItem, world);
 
 					if (robot != null && robot.getRegistry() != null)
 					{

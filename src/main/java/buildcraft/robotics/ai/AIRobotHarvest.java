@@ -3,7 +3,7 @@ package buildcraft.robotics.ai;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.core.BuildCraftAPI;
@@ -50,14 +50,16 @@ public class AIRobotHarvest extends AIRobot
 				this.terminate();
 				return;
 			}
+
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(this.robot.getOwnerFake(), this.blockFound.x, this.blockFound.y, this.blockFound.z))
+			if (EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockFound.x, this.blockFound.y, this.blockFound.z))
 			{
 				this.setSuccess(false);
 				this.terminate();
 				return;
 			}
 			// TODO gamerforEA code end
+
 			List<ItemStack> drops = new ArrayList<ItemStack>();
 			if (!CropManager.harvestCrop(this.robot.worldObj, this.blockFound.x, this.blockFound.y, this.blockFound.z, drops))
 			{

@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
@@ -121,9 +121,10 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 				if (this.getBattery().useEnergy(100, 100, false) > 0)
 				{
 					// TODO gamerforEA code start
-					if (FakePlayerUtils.cantBreak(this.getOwnerFake(), index.x, index.y, index.z))
+					if (EventUtils.cantBreak(this.fake.getPlayer(), index.x, index.y, index.z))
 						return;
 					// TODO gamerforEA code end
+
 					if (fluidToPump.getFluid() != FluidRegistry.WATER || BuildCraftCore.consumeWaterSources || this.numFluidBlocksFound < 9)
 					{
 						index = this.getNextIndexToPump(true);

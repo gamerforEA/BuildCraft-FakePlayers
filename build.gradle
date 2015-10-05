@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "7.0.23"
+version = "7.0.26"
 group= "com.mod-buildcraft"
 archivesBaseName = "buildcraft"
 
@@ -29,15 +29,10 @@ minecraft {
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar')
 	compile fileTree(dir: 'lib', include: '*-dev.jar')
 }
 
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
 	from zipTree('lib/' + archivesBaseName + '-' + version + '.jar')
-	from zipTree('lib/WorldGuardEventWrapper.jar').matching {
-		include('com/gamerforea/wgew/cauldron/event/**.class')
-	}
 }

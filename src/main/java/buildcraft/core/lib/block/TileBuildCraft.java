@@ -9,11 +9,10 @@
 package buildcraft.core.lib.block;
 
 import java.util.HashSet;
-import java.util.UUID;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
-import com.google.common.base.Strings;
-import com.mojang.authlib.GameProfile;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.api.core.ISerializable;
@@ -24,7 +23,6 @@ import buildcraft.core.lib.TileBuffer;
 import buildcraft.core.lib.network.Packet;
 import buildcraft.core.lib.network.PacketTileUpdate;
 import buildcraft.core.lib.utils.Utils;
-import buildcraft.core.proxy.CoreProxy;
 import cofh.api.energy.IEnergyHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
@@ -33,8 +31,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.ForgeDirection;
 
 /**
@@ -57,18 +53,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	private long worldTimeEnergyReceive;
 
 	// TODO gamerforEA code start
-	public GameProfile ownerProfile;
-	private FakePlayer ownerFake;
-
-	public EntityPlayer getOwnerFake()
-	{
-		if (this.ownerFake != null)
-			return this.ownerFake;
-		else if (this.ownerProfile != null)
-			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else
-			return CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.worldObj).get();
-	}
+	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.profile, this);
 	// TODO gamerforEA code end
 
 	public String getOwner()
@@ -128,8 +113,9 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 		if (entity instanceof EntityPlayer)
 		{
 			this.owner = ((EntityPlayer) entity).getDisplayName();
+
 			// TODO gamerforEA code start
-			this.ownerProfile = ((EntityPlayer) entity).getGameProfile();
+			this.fake.profile = ((EntityPlayer) entity).getGameProfile();
 			// TODO gamerforEA code end
 		}
 	}
@@ -142,7 +128,12 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	public void sendNetworkUpdate()
 	{
 		if (this.worldObj != null && !this.worldObj.isRemote)
-			BuildCraftCore.instance.sendToPlayers(this.getPacketUpdate(), this.worldObj, this.xCoord, this.yCoord, this.zCoord, DefaultProps.NETWORK_UPDATE_RANGE);
+			BuildCraftCore.instance.sendToPlayers(this.getPacketUpdate(), this.worldObj, this.xCoord, this.yCoord, this.zCoord, this.getNetworkUpdateRange());
+	}
+
+	protected int getNetworkUpdateRange()
+	{
+		return DefaultProps.NETWORK_UPDATE_RANGE;
 	}
 
 	@Override
@@ -179,12 +170,9 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 		}
 		if (this.mode != null)
 			nbt.setByte("lastMode", (byte) this.mode.ordinal());
+
 		// TODO gamerforEA code start
-		if (this.ownerProfile != null)
-		{
-			nbt.setString("ownerUUID", this.ownerProfile.getId().toString());
-			nbt.setString("ownerName", this.ownerProfile.getName());
-		}
+		this.fake.writeToNBT(nbt);
 		// TODO gamerforEA code end
 	}
 
@@ -198,14 +186,9 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 			this.battery.readFromNBT(nbt.getCompoundTag("battery"));
 		if (nbt.hasKey("lastMode"))
 			this.mode = IControllable.Mode.values()[nbt.getByte("lastMode")];
+
 		// TODO gamerforEA code start
-		String uuid = nbt.getString("ownerUUID");
-		if (!Strings.isNullOrEmpty(uuid))
-		{
-			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name))
-				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
-		}
+		this.fake.readFromNBT(nbt);
 		// TODO gamerforEA code end
 	}
 

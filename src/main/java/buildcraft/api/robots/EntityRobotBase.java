@@ -8,26 +8,20 @@
  */
 package buildcraft.api.robots;
 
-import java.util.UUID;
-
-import com.gamerforea.buildcraft.FakePlayerUtils;
-import com.google.common.base.Strings;
-import com.mojang.authlib.GameProfile;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 
 import buildcraft.api.boards.RedstoneBoardRobot;
 import buildcraft.api.core.IZone;
-import buildcraft.core.proxy.CoreProxy;
 import cofh.api.energy.IEnergyStorage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fluids.IFluidHandler;
 
 public abstract class EntityRobotBase extends EntityLiving implements IInventory, IFluidHandler
@@ -38,41 +32,20 @@ public abstract class EntityRobotBase extends EntityLiving implements IInventory
 	public static final long NULL_ROBOT_ID = Long.MAX_VALUE;
 
 	// TODO gamerforEA code start
-	public GameProfile ownerProfile;
-	private FakePlayer ownerFake;
-
-	public EntityPlayer getOwnerFake()
-	{
-		if (this.ownerFake != null)
-			return this.ownerFake;
-		else if (this.ownerProfile != null)
-			return this.ownerFake = FakePlayerUtils.create(this.worldObj, this.ownerProfile);
-		else
-			return CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.worldObj).get();
-	}
+	public FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound nbt)
 	{
 		super.writeEntityToNBT(nbt);
-		if (this.ownerProfile != null)
-		{
-			nbt.setString("ownerUUID", this.ownerProfile.getId().toString());
-			nbt.setString("ownerName", this.ownerProfile.getName());
-		}
+		this.fake.writeToNBT(nbt);
 	}
 
 	@Override
 	public void readEntityFromNBT(NBTTagCompound nbt)
 	{
 		super.readEntityFromNBT(nbt);
-		String uuid = nbt.getString("ownerUUID");
-		if (!Strings.isNullOrEmpty(uuid))
-		{
-			String name = nbt.getString("ownerName");
-			if (!Strings.isNullOrEmpty(name))
-				this.ownerProfile = new GameProfile(UUID.fromString(uuid), name);
-		}
+		this.fake.readFromNBT(nbt);
 	}
 	// TODO gamerforEA code end
 

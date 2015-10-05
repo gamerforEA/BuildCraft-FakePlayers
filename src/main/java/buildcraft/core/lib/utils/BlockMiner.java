@@ -2,11 +2,11 @@ package buildcraft.core.lib.utils;
 
 import java.util.List;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.core.lib.block.TileBuildCraft;
-import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -98,10 +98,10 @@ public class BlockMiner
 			/* TODO gamerforEA code replace, old code:
 			BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(x, y, z, world, block, meta, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get());
 			MinecraftForge.EVENT_BUS.post(breakEvent);
-			
+
 			if (!breakEvent.isCanceled())*/
-			EntityPlayer player = this.owner instanceof TileBuildCraft ? ((TileBuildCraft) this.owner).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.world).get();
-			if (!FakePlayerUtils.cantBreak(player, this.x, this.y, this.z))
+			EntityPlayer player = this.owner instanceof TileBuildCraft ? ((TileBuildCraft) this.owner).fake.getPlayer() : ModUtils.getModFake(this.world);
+			if (!EventUtils.cantBreak(player, this.x, this.y, this.z))
 			// TODO gamerforEA code end
 			{
 				List<ItemStack> stacks = BlockUtils.getItemStackFromBlock((WorldServer) this.world, this.x, this.y, this.z);

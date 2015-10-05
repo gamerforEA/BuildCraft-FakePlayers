@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.blueprints.Schematic;
@@ -37,12 +38,10 @@ import buildcraft.core.builders.BuildingSlotEntity;
 import buildcraft.core.builders.BuildingSlotMapIterator;
 import buildcraft.core.builders.IBuildingItemsProvider;
 import buildcraft.core.builders.TileAbstractBuilder;
-import buildcraft.core.lib.block.TileBuildCraft;
 import buildcraft.core.lib.inventory.InventoryCopy;
 import buildcraft.core.lib.inventory.InventoryIterator;
 import buildcraft.core.lib.inventory.StackHelper;
 import buildcraft.core.lib.utils.BlockUtils;
-import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -50,7 +49,6 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings.GameType;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
@@ -394,7 +392,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 				else if (slot.mode == Mode.ClearIfInvalid)
 				{
 					// TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
-					if (BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z) || FakePlayerUtils.cantBreak(builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), slot.x, slot.y, slot.z))
+					if (BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder != null ? builder.fake.getPlayer() : ModUtils.getModFake(world), slot.x, slot.y, slot.z))
 					// TODO gamerforEA code end
 					{
 						this.iterator.remove();
@@ -423,7 +421,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 					{
 						if (!BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 							continue; // Can't build yet, wait (#2751)
-						else if (FakePlayerUtils.cantBreak(builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).getOwnerFake() : CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get(), slot.x, slot.y, slot.z))
+						else if (EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z))
 						// TODO gamerforEA code end
 						{
 							// Forge does not allow us to place a block in

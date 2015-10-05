@@ -8,7 +8,7 @@
  */
 package buildcraft.factory;
 
-import com.gamerforea.buildcraft.FakePlayerUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
@@ -94,7 +94,7 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 			{
 				this.ticksSinceAction = 0;
 				// TODO gamerforEA code start
-				if (!FakePlayerUtils.cantBreak(this.getOwnerFake(), this.xCoord, depth, this.zCoord))
+				if (!EventUtils.cantBreak(this.fake.getPlayer(), this.xCoord, depth, this.zCoord))
 					// TODO gamerforEA code end
 					world.setBlock(this.xCoord, depth, this.zCoord, BuildCraftFactory.plainPipeBlock);
 			}

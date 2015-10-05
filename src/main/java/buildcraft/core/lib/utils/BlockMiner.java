@@ -81,6 +81,12 @@ public class BlockMiner
 
 	public int acceptEnergy(int offeredAmount)
 	{
+		if (BlockUtils.isUnbreakableBlock(this.world, this.x, this.y, this.z))
+		{
+			this.hasFailed = true;
+			return 0;
+		}
+
 		this.energyRequired = BlockUtils.computeBlockBreakEnergy(this.world, this.x, this.y, this.z);
 
 		int usedAmount = MathUtils.clamp(offeredAmount, 0, Math.max(0, this.energyRequired - this.energyAccepted));

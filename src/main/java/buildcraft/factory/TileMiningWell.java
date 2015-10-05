@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
@@ -110,12 +110,11 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 			int usedEnergy = this.miner.acceptEnergy(this.getBattery().getEnergyStored());
 			this.getBattery().useEnergy(usedEnergy, usedEnergy, false);
 
-			if (this.miner.hasMined())
-			{
-				if (this.miner.hasFailed())
-					this.isDigging = false;
+			if (this.miner.hasFailed())
+				this.isDigging = false;
+
+			if (this.miner.hasFailed() || this.miner.hasMined())
 				this.miner = null;
-			}
 		}
 	}
 

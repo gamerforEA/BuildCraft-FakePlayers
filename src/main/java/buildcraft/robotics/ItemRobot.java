@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
@@ -16,7 +16,7 @@ import buildcraft.BuildCraftRobotics;
 import buildcraft.api.boards.RedstoneBoardNBT;
 import buildcraft.api.boards.RedstoneBoardRegistry;
 import buildcraft.api.boards.RedstoneBoardRobotNBT;
-import buildcraft.api.events.RobotPlacementEvent;
+import buildcraft.api.events.RobotEvent;
 import buildcraft.api.robots.DockingStation;
 import buildcraft.api.robots.EntityRobotBase;
 import buildcraft.core.BCCreativeTab;
@@ -25,7 +25,6 @@ import buildcraft.core.lib.utils.NBTUtils;
 import buildcraft.transport.BlockGenericPipe;
 import buildcraft.transport.Pipe;
 import cofh.api.energy.IEnergyContainerItem;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -38,6 +37,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 {
@@ -53,7 +53,8 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	}
 	// TODO gamerforEA code end
 
-	public EntityRobot createRobot(EntityPlayer player, ItemStack stack, World world) // TODO gamerforEA add EntityPlayer parameter
+	// TODO gamerforEA add EntityPlayer parameter
+	public EntityRobot createRobot(EntityPlayer player, ItemStack stack, World world)
 	{
 		try
 		{
@@ -213,13 +214,14 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 					RedstoneBoardRobotNBT robotNBT = ItemRobot.getRobotNBT(currentItem);
 					if (robotNBT == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
 						return true;
-					RobotPlacementEvent robotEvent = new RobotPlacementEvent(player, robotNBT.getID());
-					FMLCommonHandler.instance().bus().post(robotEvent);
-					if (robotEvent.isCanceled())
-						return true;
 
 					// TODO gamerforEA add EntityPlayer parameter
 					EntityRobot robot = ((ItemRobot) currentItem.getItem()).createRobot(player, currentItem, world);
+
+					RobotEvent.Place robotEvent = new RobotEvent.Place(robot, player);
+					MinecraftForge.EVENT_BUS.post(robotEvent);
+					if (robotEvent.isCanceled())
+						return true;
 
 					if (robot != null && robot.getRegistry() != null)
 					{

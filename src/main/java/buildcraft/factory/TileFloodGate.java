@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
@@ -273,19 +273,22 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 				data.setBoolean("blocked[" + i + "]", true);
 	}
 
-	// TODO: fit in single byte
 	@Override
 	public void readData(ByteBuf stream)
 	{
+		byte flags = stream.readByte();
 		for (int i = 0; i < 6; i++)
-			this.blockedSides[i] = stream.readBoolean();
+			this.blockedSides[i] = (flags & 1 << i) != 0;
 	}
 
 	@Override
 	public void writeData(ByteBuf stream)
 	{
+		byte flags = 0;
 		for (int i = 0; i < 6; i++)
-			stream.writeBoolean(this.blockedSides[i]);
+			if (this.blockedSides[i])
+				flags |= 1 << i;
+		stream.writeByte(flags);
 	}
 
 	public void switchSide(ForgeDirection side)

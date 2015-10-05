@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
@@ -53,7 +53,7 @@ public class AIRobotBreak extends AIRobot
 		this.robot.setItemActive(true);
 		this.block = this.robot.worldObj.getBlock(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
 		this.meta = this.robot.worldObj.getBlockMetadata(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
-		this.hardness = this.block.getBlockHardness(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+		this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block);
 		this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
 	}
 
@@ -70,10 +70,10 @@ public class AIRobotBreak extends AIRobot
 				return;
 			}
 			this.meta = this.robot.worldObj.getBlockMetadata(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
-			this.hardness = this.block.getBlockHardness(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+			this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block);
 			this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
 		}
-		if (this.block.isAir(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z))
+		if (this.block.isAir(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) || this.hardness < 0)
 		{
 			this.setSuccess(false);
 			this.terminate();

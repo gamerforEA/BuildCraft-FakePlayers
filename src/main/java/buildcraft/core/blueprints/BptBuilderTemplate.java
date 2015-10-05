@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
  * License 1.0, or MMPL. Please check the contents of the license located in
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
@@ -29,7 +29,6 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 public class BptBuilderTemplate extends BptBuilderBase
 {
-
 	private LinkedList<BuildingSlotBlock> clearList = new LinkedList<BuildingSlotBlock>();
 	private LinkedList<BuildingSlotBlock> buildList = new LinkedList<BuildingSlotBlock>();
 	private BuildingSlotIterator iteratorBuild, iteratorClear;
@@ -44,15 +43,19 @@ public class BptBuilderTemplate extends BptBuilderBase
 	{
 		if (this.blueprint.excavate)
 			for (int j = this.blueprint.sizeY - 1; j >= 0; --j)
+			{
+				int yCoord = j + this.y - this.blueprint.anchorY;
+
+				if (yCoord < 0 || yCoord >= this.context.world.getHeight())
+					continue;
+
 				for (int i = 0; i < this.blueprint.sizeX; ++i)
+				{
+					int xCoord = i + this.x - this.blueprint.anchorX;
+
 					for (int k = 0; k < this.blueprint.sizeZ; ++k)
 					{
-						int xCoord = i + this.x - this.blueprint.anchorX;
-						int yCoord = j + this.y - this.blueprint.anchorY;
 						int zCoord = k + this.z - this.blueprint.anchorZ;
-
-						if (yCoord < 0 || yCoord >= this.context.world.getHeight())
-							continue;
 
 						SchematicBlockBase slot = this.blueprint.get(i, j, k);
 
@@ -70,17 +73,23 @@ public class BptBuilderTemplate extends BptBuilderBase
 							this.clearList.add(b);
 						}
 					}
+				}
+			}
 
 		for (int j = 0; j < this.blueprint.sizeY; ++j)
+		{
+			int yCoord = j + this.y - this.blueprint.anchorY;
+
+			if (yCoord < 0 || yCoord >= this.context.world.getHeight())
+				continue;
+
 			for (int i = 0; i < this.blueprint.sizeX; ++i)
+			{
+				int xCoord = i + this.x - this.blueprint.anchorX;
+
 				for (int k = 0; k < this.blueprint.sizeZ; ++k)
 				{
-					int xCoord = i + this.x - this.blueprint.anchorX;
-					int yCoord = j + this.y - this.blueprint.anchorY;
 					int zCoord = k + this.z - this.blueprint.anchorZ;
-
-					if (yCoord < 0 || yCoord >= this.context.world.getHeight())
-						continue;
 
 					SchematicBlockBase slot = this.blueprint.get(i, j, k);
 
@@ -99,6 +108,8 @@ public class BptBuilderTemplate extends BptBuilderBase
 						this.buildList.add(b);
 					}
 				}
+			}
+		}
 
 		this.iteratorBuild = new BuildingSlotIterator(this.buildList);
 		this.iteratorClear = new BuildingSlotIterator(this.clearList);
@@ -170,7 +181,8 @@ public class BptBuilderTemplate extends BptBuilderBase
 			if (!world.blockExists(slot.x, slot.y, slot.z))
 				continue;
 
-			if (this.canDestroy(builder, this.context, slot)) // TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
+			if (this.canDestroy(builder, this.context, slot))
+				// TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
 				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 				// TODO gamerforEA code end
 				{

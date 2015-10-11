@@ -104,7 +104,7 @@ public class BlockMiner
 			/* TODO gamerforEA code replace, old code:
 			BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(x, y, z, world, block, meta, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get());
 			MinecraftForge.EVENT_BUS.post(breakEvent);
-
+			
 			if (!breakEvent.isCanceled())*/
 			EntityPlayer player = this.owner instanceof TileBuildCraft ? ((TileBuildCraft) this.owner).fake.getPlayer() : ModUtils.getModFake(this.world);
 			if (!EventUtils.cantBreak(player, this.x, this.y, this.z))

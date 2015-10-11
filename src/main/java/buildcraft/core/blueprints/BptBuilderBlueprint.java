@@ -36,7 +36,6 @@ import buildcraft.core.builders.BuildingSlot;
 import buildcraft.core.builders.BuildingSlotBlock;
 import buildcraft.core.builders.BuildingSlotBlock.Mode;
 import buildcraft.core.builders.BuildingSlotEntity;
-import buildcraft.core.builders.BuildingSlotMapIterator;
 import buildcraft.core.builders.IBuildingItemsProvider;
 import buildcraft.core.builders.TileAbstractBuilder;
 import buildcraft.core.lib.inventory.InventoryCopy;
@@ -58,12 +57,12 @@ import net.minecraftforge.fluids.FluidStack;
 
 public class BptBuilderBlueprint extends BptBuilderBase
 {
-	public ArrayList<RequirementItemStack> neededItems = new ArrayList<RequirementItemStack>();
-
 	protected HashSet<Integer> builtEntities = new HashSet<Integer>();
+	protected HashMap<BuilderItemMetaPair, List<BuildingSlotBlock>> buildList = new HashMap<BuilderItemMetaPair, List<BuildingSlotBlock>>();
+	protected int[] buildStageOccurences;
 
-	private HashMap<BuilderItemMetaPair, List<BuildingSlotBlock>> buildList = new HashMap<BuilderItemMetaPair, List<BuildingSlotBlock>>();
-	private int[] buildStageOccurences;
+	private ArrayList<RequirementItemStack> neededItems = new ArrayList<RequirementItemStack>();
+
 	private LinkedList<BuildingSlotEntity> entityList = new LinkedList<BuildingSlotEntity>();
 	private LinkedList<BuildingSlot> postProcessing = new LinkedList<BuildingSlot>();
 	private BuildingSlotMapIterator iterator;
@@ -258,8 +257,6 @@ public class BptBuilderBlueprint extends BptBuilderBase
 
 	private void checkDone()
 	{
-		this.recomputeNeededItems();
-
 		if (this.getBuildListCount() == 0 && this.entityList.size() == 0)
 			this.done = true;
 		else
@@ -356,7 +353,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 			return null;
 
 		if (this.iterator == null)
-			this.iterator = new BuildingSlotMapIterator(this.buildList, builder, this.buildStageOccurences);
+			this.iterator = new BuildingSlotMapIterator(this, builder);
 
 		BuildingSlotBlock slot;
 		this.iterator.refresh(builder);
@@ -497,6 +494,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		return null;
 	}
 
+	// TODO: Remove recomputeNeededItems() and replace with something more efficient
 	private BuildingSlot internalGetNextEntity(World world, TileAbstractBuilder builder)
 	{
 		Iterator<BuildingSlotEntity> it = this.entityList.iterator();
@@ -506,13 +504,17 @@ public class BptBuilderBlueprint extends BptBuilderBase
 			BuildingSlotEntity slot = it.next();
 
 			if (slot.isAlreadyBuilt(this.context))
+			{
 				it.remove();
+				this.recomputeNeededItems();
+			}
 			else if (this.checkRequirements(builder, slot.schematic))
 			{
 				builder.consumeEnergy(slot.getEnergyRequirement());
 				this.useRequirements(builder, slot);
 
 				it.remove();
+				this.recomputeNeededItems();
 				this.postProcessing.add(slot);
 				this.builtEntities.add(slot.sequenceNumber);
 				return slot;
@@ -682,7 +684,94 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		}
 	}
 
-	public void recomputeNeededItems()
+	public List<RequirementItemStack> getNeededItems()
+	{
+		return this.neededItems;
+	}
+
+	protected void onRemoveBuildingSlotBlock(BuildingSlotBlock slot)
+	{
+		this.buildStageOccurences[slot.buildStage]--;
+		LinkedList<ItemStack> stacks = new LinkedList<ItemStack>();
+
+		try
+		{
+			stacks = slot.getRequirements(this.context);
+		}
+		catch (Throwable t)
+		{
+			// Defensive code against errors in implementers
+			t.printStackTrace();
+			BCLog.logger.throwing(t);
+		}
+
+		HashMap<StackKey, Integer> computeStacks = new HashMap<StackKey, Integer>();
+
+		for (ItemStack stack : stacks)
+		{
+			if (stack == null || stack.getItem() == null || stack.stackSize == 0)
+				continue;
+
+			StackKey key = new StackKey(stack);
+
+			if (!computeStacks.containsKey(key))
+				computeStacks.put(key, stack.stackSize);
+			else
+			{
+				Integer num = computeStacks.get(key);
+				num += stack.stackSize;
+				computeStacks.put(key, num);
+			}
+		}
+
+		for (RequirementItemStack ris : this.neededItems)
+		{
+			StackKey stackKey = new StackKey(ris.stack);
+			if (computeStacks.containsKey(stackKey))
+			{
+				Integer num = computeStacks.get(stackKey);
+				if (ris.size <= num)
+				{
+					this.recomputeNeededItems();
+					return;
+				}
+				else
+					this.neededItems.set(this.neededItems.indexOf(ris), new RequirementItemStack(ris.stack, ris.size - num));
+			}
+		}
+
+		this.sortNeededItems();
+	}
+
+	private void sortNeededItems()
+	{
+		Collections.sort(this.neededItems, new Comparator<RequirementItemStack>()
+		{
+			@Override
+			public int compare(RequirementItemStack o1, RequirementItemStack o2)
+			{
+				if (o1.size != o2.size)
+					return o1.size < o2.size ? 1 : -1;
+				else
+				{
+					ItemStack os1 = o1.stack;
+					ItemStack os2 = o2.stack;
+					if (Item.getIdFromItem(os1.getItem()) > Item.getIdFromItem(os2.getItem()))
+						return -1;
+					else if (Item.getIdFromItem(os1.getItem()) < Item.getIdFromItem(os2.getItem()))
+						return 1;
+					else if (os1.getItemDamage() > os2.getItemDamage())
+						return -1;
+					else if (os1.getItemDamage() < os2.getItemDamage())
+						return 1;
+					else
+						return 0;
+				}
+			}
+		});
+	}
+
+	private void recomputeNeededItems()
 	{
 		this.neededItems.clear();
 
@@ -764,30 +853,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		for (Entry<StackKey, Integer> e : computeStacks.entrySet())
 			this.neededItems.add(new RequirementItemStack(e.getKey().stack.copy(), e.getValue()));
 
-		Collections.sort(this.neededItems, new Comparator<RequirementItemStack>()
-		{
-			@Override
-			public int compare(RequirementItemStack o1, RequirementItemStack o2)
-			{
-				if (o1.size != o2.size)
-					return o1.size < o2.size ? 1 : -1;
-				else
-				{
-					ItemStack os1 = o1.stack;
-					ItemStack os2 = o2.stack;
-					if (Item.getIdFromItem(os1.getItem()) > Item.getIdFromItem(os2.getItem()))
-						return -1;
-					else if (Item.getIdFromItem(os1.getItem()) < Item.getIdFromItem(os2.getItem()))
-						return 1;
-					else if (os1.getItemDamage() > os2.getItemDamage())
-						return -1;
-					else if (os1.getItemDamage() < os2.getItemDamage())
-						return 1;
-					else
-						return 0;
-				}
-			}
-		});
+		this.sortNeededItems();
 	}
 
 	@Override

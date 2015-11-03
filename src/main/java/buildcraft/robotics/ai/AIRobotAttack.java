@@ -37,7 +37,8 @@ public class AIRobotAttack extends AIRobot
 	@Override
 	public void preempt(AIRobot ai)
 	{
-		if (ai instanceof AIRobotGotoBlock) // target may become null in the event of a load. In that case, just
+		if (ai instanceof AIRobotGotoBlock)
+			// target may become null in the event of a load. In that case, just
 			// go to the expected location.
 			if (this.target != null && this.robot.getDistanceToEntity(this.target) <= 2.0)
 			{

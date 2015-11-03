@@ -73,6 +73,7 @@ public class AIRobotBreak extends AIRobot
 			this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block);
 			this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
 		}
+
 		if (this.block.isAir(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) || this.hardness < 0)
 		{
 			this.setSuccess(false);
@@ -82,7 +83,8 @@ public class AIRobotBreak extends AIRobot
 
 		if (this.hardness != 0)
 			this.blockDamage += this.speed / this.hardness / 30F;
-		else // Instantly break the block
+		else
+			// Instantly break the block
 			this.blockDamage = 1.1F;
 
 		if (this.blockDamage > 1.0F)
@@ -90,11 +92,14 @@ public class AIRobotBreak extends AIRobot
 			this.robot.worldObj.destroyBlockInWorldPartially(this.robot.getEntityId(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, -1);
 			this.blockDamage = 0;
 
+			boolean continueBreaking = true;
+
 			if (this.robot.getHeldItem() != null)
-				this.robot.getHeldItem().getItem().onBlockStartBreak(this.robot.getHeldItem(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.robot.worldObj).get());
+				if (this.robot.getHeldItem().getItem().onBlockStartBreak(this.robot.getHeldItem(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.robot.worldObj).get()))
+					continueBreaking = false;
 
 			// TODO gamerforEA add condition [1]
-			if (!EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.breakBlock((WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, 6000))
+			if (continueBreaking && !EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.harvestBlock((WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, robot.getHeldItem()))
 			{
 				this.robot.worldObj.playAuxSFXAtEntity(null, 2001, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, Block.getIdFromBlock(this.block) + (this.meta << 12));
 
@@ -102,7 +107,7 @@ public class AIRobotBreak extends AIRobot
 				{
 					this.robot.getHeldItem().getItem().onBlockDestroyed(this.robot.getHeldItem(), this.robot.worldObj, this.block, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.robot);
 
-					if (this.robot.getHeldItem().getItemDamage() >= this.robot.getHeldItem().getMaxDamage())
+					if (this.robot.getHeldItem().stackSize == 0)
 						this.robot.setItemInUse(null);
 				}
 			}
@@ -113,6 +118,7 @@ public class AIRobotBreak extends AIRobot
 		}
 		else
 			this.robot.worldObj.destroyBlockInWorldPartially(this.robot.getEntityId(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, (int) (this.blockDamage * 10.0F) - 1);
+
 	}
 
 	@Override

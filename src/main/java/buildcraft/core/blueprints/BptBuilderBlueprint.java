@@ -900,5 +900,4 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		for (int i = 0; i < entitiesBuiltArr.length; ++i)
 			this.builtEntities.add(i);
 	}
-
 }

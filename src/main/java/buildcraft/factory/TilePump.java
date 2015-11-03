@@ -168,6 +168,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	private boolean isBlocked(int x, int y, int z)
 	{
 		Material mat = BlockUtils.getBlock(this.worldObj, x, y, z).getMaterial();
+
 		return mat.blocksMovement();
 	}
 

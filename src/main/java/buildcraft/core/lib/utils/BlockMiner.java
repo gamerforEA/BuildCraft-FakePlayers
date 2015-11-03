@@ -98,18 +98,18 @@ public class BlockMiner
 
 			this.hasMined = true;
 
-			Block block = this.world.getBlock(this.x, this.y, this.z);
-			int meta = this.world.getBlockMetadata(this.x, this.y, this.z);
-
 			/* TODO gamerforEA code replace, old code:
-			BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(x, y, z, world, block, meta, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get());
+			BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(this.x, this.y, this.z, this.world, block, meta, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.world).get());
 			MinecraftForge.EVENT_BUS.post(breakEvent);
 			
-			if (!breakEvent.isCanceled())*/
+			if (!breakEvent.isCanceled()) */
 			EntityPlayer player = this.owner instanceof TileBuildCraft ? ((TileBuildCraft) this.owner).fake.getPlayer() : ModUtils.getModFake(this.world);
 			if (!EventUtils.cantBreak(player, this.x, this.y, this.z))
 			// TODO gamerforEA code end
 			{
+				Block block = this.world.getBlock(this.x, this.y, this.z);
+				int meta = this.world.getBlockMetadata(this.x, this.y, this.z);
+
 				List<ItemStack> stacks = BlockUtils.getItemStackFromBlock((WorldServer) this.world, this.x, this.y, this.z);
 
 				if (stacks != null)
@@ -118,6 +118,7 @@ public class BlockMiner
 							this.mineStack(s);
 
 				this.world.playAuxSFXAtEntity(null, 2001, this.x, this.y, this.z, Block.getIdFromBlock(block) + (meta << 12));
+
 				this.world.setBlockToAir(this.x, this.y, this.z);
 			}
 			else

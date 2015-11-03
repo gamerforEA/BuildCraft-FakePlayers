@@ -44,6 +44,19 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	public ItemRobot()
 	{
 		super(BCCreativeTab.get("boards"));
+		this.setMaxStackSize(1);
+	}
+
+	@Override
+	public int getItemStackLimit(ItemStack stack)
+	{
+		NBTTagCompound cpt = getNBT(stack);
+		RedstoneBoardRobotNBT boardNBT = getRobotNBT(cpt);
+
+		if (boardNBT != RedstoneBoardRegistry.instance.getEmptyRobotBoard())
+			return 1;
+		else
+			return 16;
 	}
 
 	// TODO gamerforEA code start
@@ -64,11 +77,12 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 			if (robotNBT == RedstoneBoardRegistry.instance.getEmptyRobotBoard())
 				return null;
 			EntityRobot robot = new EntityRobot(world, robotNBT);
-			robot.getBattery().setEnergy(getEnergy(nbt));
 
 			// TODO gamerforEA code start
 			robot.fake.profile = player.getGameProfile();
 			// TODO gamerforEA code end
+
+			robot.getBattery().setEnergy(getEnergy(nbt));
 
 			return robot;
 		}

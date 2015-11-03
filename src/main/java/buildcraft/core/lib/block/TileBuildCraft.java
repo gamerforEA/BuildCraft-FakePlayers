@@ -91,6 +91,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 
 	public void initialize()
 	{
+
 	}
 
 	@Override
@@ -139,11 +140,13 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	@Override
 	public void writeData(ByteBuf stream)
 	{
+
 	}
 
 	@Override
 	public void readData(ByteBuf stream)
 	{
+
 	}
 
 	public Packet getPacketUpdate()

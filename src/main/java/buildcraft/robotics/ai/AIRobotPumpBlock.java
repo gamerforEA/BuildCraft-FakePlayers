@@ -61,6 +61,7 @@ public class AIRobotPumpBlock extends AIRobot
 					BlockUtils.drainBlock(this.robot.worldObj, this.blockToPump.x, this.blockToPump.y, this.blockToPump.z, true);
 			this.terminate();
 		}
+
 	}
 
 	@Override

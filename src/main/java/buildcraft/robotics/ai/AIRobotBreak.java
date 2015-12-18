@@ -15,13 +15,13 @@ import buildcraft.api.core.BlockIndex;
 import buildcraft.api.robots.AIRobot;
 import buildcraft.api.robots.EntityRobotBase;
 import buildcraft.core.lib.utils.BlockUtils;
-import buildcraft.core.proxy.CoreProxy;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class AIRobotBreak extends AIRobot
 {
@@ -53,7 +53,7 @@ public class AIRobotBreak extends AIRobot
 		this.robot.setItemActive(true);
 		this.block = this.robot.worldObj.getBlock(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
 		this.meta = this.robot.worldObj.getBlockMetadata(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
-		this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block);
+		this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block, this.robot.getHeldItem());
 		this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
 	}
 
@@ -70,7 +70,7 @@ public class AIRobotBreak extends AIRobot
 				return;
 			}
 			this.meta = this.robot.worldObj.getBlockMetadata(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
-			this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block);
+			this.hardness = BlockUtils.getBlockHardnessMining(this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.block, this.robot.getHeldItem());
 			this.speed = this.getBreakSpeed(this.robot, this.robot.getHeldItem(), this.block, this.meta);
 		}
 
@@ -92,14 +92,8 @@ public class AIRobotBreak extends AIRobot
 			this.robot.worldObj.destroyBlockInWorldPartially(this.robot.getEntityId(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, -1);
 			this.blockDamage = 0;
 
-			boolean continueBreaking = true;
-
-			if (this.robot.getHeldItem() != null)
-				if (this.robot.getHeldItem().getItem().onBlockStartBreak(this.robot.getHeldItem(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) this.robot.worldObj).get()))
-					continueBreaking = false;
-
-			// TODO gamerforEA add condition [1]
-			if (continueBreaking && !EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.harvestBlock((WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, robot.getHeldItem()))
+			// TODO gamerforEA add condition [1], add EntityPlayer parameter [2]
+			if (!EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.harvestBlock(this.robot.fake.getPlayer(), (WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.robot.getHeldItem()))
 			{
 				this.robot.worldObj.playAuxSFXAtEntity(null, 2001, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, Block.getIdFromBlock(this.block) + (this.meta << 12));
 
@@ -150,7 +144,9 @@ public class AIRobotBreak extends AIRobot
 			}
 		}
 
-		return f;
+		// TODO gamerforEA add EntityPlayer parameter
+		f = ForgeEventFactory.getBreakSpeed(BlockUtils.getFakePlayerWithTool(this.robot.fake.getPlayer(), (WorldServer) robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, robot.getHeldItem()), block, meta, f, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z);
+		return f < 0 ? 0 : f;
 	}
 
 	@Override

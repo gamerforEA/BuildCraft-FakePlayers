@@ -193,7 +193,7 @@ public class BuildingItem implements IBuildingItem, ISerializable
 			if (this.slotToBuild.writeToWorld(player, this.context))
 				// TODO gamerforEA code end
 				this.context.world().playAuxSFXAtEntity(null, 2001, destX, destY, destZ, Block.getIdFromBlock(oldBlock) + (oldMeta << 12));
-			else
+			else if (this.slotToBuild.stackConsumed != null)
 				for (ItemStack s : this.slotToBuild.stackConsumed)
 					if (s != null && !(s.getItem() instanceof ItemBlock && Block.getBlockFromItem(s.getItem()) instanceof BlockBuildTool))
 						InvUtils.dropItems(this.context.world(), s, destX, destY, destZ);

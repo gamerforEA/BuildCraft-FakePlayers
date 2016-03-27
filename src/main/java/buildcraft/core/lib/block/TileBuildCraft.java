@@ -223,7 +223,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	{
 		if (this.battery != null && this.canConnectEnergy(from))
 		{
-			int received = this.battery.receiveEnergy(maxReceive - this.receivedTick, simulate);
+			int received = this.battery.receiveEnergy(Math.min(maxReceive, this.battery.getMaxEnergyReceive() - this.receivedTick), simulate);
 			if (!simulate)
 			{
 				this.receivedTick += received;
@@ -243,7 +243,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	{
 		if (this.battery != null && this.canConnectEnergy(from))
 		{
-			int extracted = this.battery.extractEnergy(maxExtract - this.extractedTick, simulate);
+			int extracted = this.battery.extractEnergy(Math.min(maxExtract, this.battery.getMaxEnergyExtract() - this.extractedTick), simulate);
 			if (!simulate)
 				this.extractedTick += extracted;
 			return extracted;

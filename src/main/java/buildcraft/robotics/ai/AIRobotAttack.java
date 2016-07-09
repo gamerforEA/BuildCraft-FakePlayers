@@ -42,8 +42,8 @@ public class AIRobotAttack extends AIRobot
 			// go to the expected location.
 			if (this.target != null && this.robot.getDistanceToEntity(this.target) <= 2.0)
 			{
-				this.abortDelegateAI();
-				this.robot.setItemActive(true);
+			this.abortDelegateAI();
+			this.robot.setItemActive(true);
 			}
 	}
 

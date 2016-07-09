@@ -186,18 +186,18 @@ public class BptBuilderTemplate extends BptBuilderBase
 				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 				// TODO gamerforEA code end
 				{
-					this.iteratorClear.remove();
-					this.markLocationUsed(slot.x, slot.y, slot.z);
+				this.iteratorClear.remove();
+				this.markLocationUsed(slot.x, slot.y, slot.z);
 				}
 				else
 				{
-					this.consumeEnergyToDestroy(builder, slot);
-					this.createDestroyItems(slot);
+				this.consumeEnergyToDestroy(builder, slot);
+				this.createDestroyItems(slot);
 
-					result = slot;
-					this.iteratorClear.remove();
-					this.markLocationUsed(slot.x, slot.y, slot.z);
-					break;
+				result = slot;
+				this.iteratorClear.remove();
+				this.markLocationUsed(slot.x, slot.y, slot.z);
+				break;
 				}
 		}
 

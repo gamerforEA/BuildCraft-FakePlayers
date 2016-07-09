@@ -34,10 +34,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 
 /**
- * For future maintainers: This class intentionally does not implement
- * just every interface out there. For some of them (such as IControllable),
- * we expect the tiles supporting it to implement it - but TileBuildCraft
- * provides all the underlying functionality to stop code repetition.
+ * For future maintainers: This class intentionally does not implement just
+ * every interface out there. For some of them (such as IControllable), we
+ * expect the tiles supporting it to implement it - but TileBuildCraft provides
+ * all the underlying functionality to stop code repetition.
  */
 public abstract class TileBuildCraft extends TileEntity implements IEnergyHandler, ISerializable
 {

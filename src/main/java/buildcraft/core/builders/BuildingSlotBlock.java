@@ -46,7 +46,8 @@ public class BuildingSlotBlock extends BuildingSlot
 
 	public enum Mode
 	{
-		ClearIfInvalid, Build
+		ClearIfInvalid,
+		Build
 	}
 
 	public Mode mode = Mode.Build;

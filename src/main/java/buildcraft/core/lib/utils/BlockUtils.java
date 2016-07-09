@@ -314,7 +314,8 @@ public final class BlockUtils
 	}
 
 	/**
-	 * The following functions let you avoid unnecessary chunk loads, which is nice.
+	 * The following functions let you avoid unnecessary chunk loads, which is
+	 * nice.
 	 */
 	public static TileEntity getTileEntity(World world, int x, int y, int z)
 	{

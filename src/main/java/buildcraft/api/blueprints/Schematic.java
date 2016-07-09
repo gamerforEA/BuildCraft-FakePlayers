@@ -56,8 +56,8 @@ public abstract class Schematic
 	 * This is called to verify whether the required item is equal to the
 	 * supplied item.
 	 *
-	 * Primarily rely on this for checking metadata/NBT - the item ID
-	 * itself might have been filtered out by previously running code.
+	 * Primarily rely on this for checking metadata/NBT - the item ID itself
+	 * might have been filtered out by previously running code.
 	 */
 	public boolean isItemMatchingRequirement(ItemStack suppliedStack, ItemStack requiredStack)
 	{

@@ -322,7 +322,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 	{
 		if (!world.isAirBlock(x, y, z))
 		{
-			BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(x, y, z, world, world.getBlock(x, y, z), world.getBlockMetadata(x, y, z), CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world).get());
+			BlockEvent.BreakEvent breakEvent = new BlockEvent.BreakEvent(x, y, z, world, world.getBlock(x, y, z), world.getBlockMetadata(x, y, z), CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world, this.x, this.y, this.z).get());
 			MinecraftForge.EVENT_BUS.post(breakEvent);
 			return breakEvent.isCanceled();
 		}
@@ -334,7 +334,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 		Block block = schematic instanceof SchematicBlock ? ((SchematicBlock) schematic).block : Blocks.stone;
 		int meta = schematic instanceof SchematicBlock ? ((SchematicBlock) schematic).meta : 0;
 
-		BlockEvent.PlaceEvent placeEvent = new BlockEvent.PlaceEvent(new BlockSnapshot(world, x, y, z, block, meta), Blocks.air, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world, x, y, z).get());
+		BlockEvent.PlaceEvent placeEvent = new BlockEvent.PlaceEvent(new BlockSnapshot(world, x, y, z, block, meta), Blocks.air, CoreProxy.proxy.getBuildCraftPlayer((WorldServer) world, this.x, this.y, this.z).get());
 
 		MinecraftForge.EVENT_BUS.post(placeEvent);
 		return placeEvent.isCanceled();

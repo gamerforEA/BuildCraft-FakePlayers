@@ -408,11 +408,14 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		// TODO gamerforEA code start
 		if (EventConfig.inBlackList(EventConfig.autoCraftBlackList, result.getItem(), result.getItemDamage()))
 			result = null;
+		ItemStack resultInto = this.resultInv.getStackInSlot(0);
+		if (resultInto != null && result != null && result.isItemEqual(resultInto) && !ItemStack.areItemStackTagsEqual(result, resultInto))
+			result = null;
 		// TODO gamerforEA code end
 
 		if (result != null && result.stackSize > 0)
 		{
-			ItemStack resultInto = this.resultInv.getStackInSlot(0);
+			// TODO gamerforEA code clear: ItemStack resultInto = this.resultInv.getStackInSlot(0);
 
 			this.craftSlot.onPickupFromSlot(this.getInternalPlayer().get(), result);
 

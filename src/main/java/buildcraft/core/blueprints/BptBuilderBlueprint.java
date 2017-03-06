@@ -417,7 +417,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 				else if (slot.mode == Mode.ClearIfInvalid)
 				{
 					// TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
-					if (BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder != null ? builder.fake.getPlayer() : ModUtils.getModFake(world), slot.x, slot.y, slot.z))
+					if (BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder != null ? builder.fake.get() : ModUtils.getModFake(world), slot.x, slot.y, slot.z))
 					// TODO gamerforEA code end
 					{
 						this.iterator.remove();
@@ -447,7 +447,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 						if (!BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z) || this.requirementMap.contains(new BlockIndex(slot.x, slot.y, slot.z)))
 							continue; // Can't build yet, wait (#2751)
 						// TODO gamerforEA condition replace, old code: isBlockPlaceCanceled(world, slot.x, slot.y, slot.z, slot.schematic)
-						else if (EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z))
+						else if (builder.fake.cantBreak(slot.x, slot.y, slot.z))
 						// TODO gamerforEA code end
 						{
 							// Forge does not allow us to place a block in

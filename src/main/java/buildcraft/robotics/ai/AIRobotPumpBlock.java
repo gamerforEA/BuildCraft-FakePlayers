@@ -8,8 +8,6 @@
  */
 package buildcraft.robotics.ai;
 
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.robots.AIRobot;
 import buildcraft.api.robots.EntityRobotBase;
@@ -56,7 +54,7 @@ public class AIRobotPumpBlock extends AIRobot
 		{
 			FluidStack fluidStack = BlockUtils.drainBlock(this.robot.worldObj, this.blockToPump.x, this.blockToPump.y, this.blockToPump.z, false);
 			// TODO gamerforEA add condition [2]
-			if (fluidStack != null && !EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockToPump.x, this.blockToPump.y, this.blockToPump.z))
+			if (fluidStack != null && !this.robot.fake.cantBreak(this.blockToPump.x, this.blockToPump.y, this.blockToPump.z))
 				if (this.robot.fill(ForgeDirection.UNKNOWN, fluidStack, true) > 0)
 					BlockUtils.drainBlock(this.robot.worldObj, this.blockToPump.x, this.blockToPump.y, this.blockToPump.z, true);
 			this.terminate();

@@ -189,7 +189,7 @@ public class BuildingItem implements IBuildingItem, ISerializable
 			int originY = MathHelper.floor_double(this.origin.y);
 			int originZ = MathHelper.floor_double(this.origin.z);
 			TileEntity originTile = this.context.world().getTileEntity(originX, originY, originZ);
-			EntityPlayer player = originTile instanceof TileBuildCraft ? ((TileBuildCraft) originTile).fake.getPlayer() : ModUtils.getModFake(this.context.world());
+			EntityPlayer player = originTile instanceof TileBuildCraft ? ((TileBuildCraft) originTile).fake.get() : ModUtils.getModFake(this.context.world());
 			if (this.slotToBuild.writeToWorld(player, this.context))
 				// TODO gamerforEA code end
 				this.context.world().playAuxSFXAtEntity(null, 2001, destX, destY, destZ, Block.getIdFromBlock(oldBlock) + (oldMeta << 12));

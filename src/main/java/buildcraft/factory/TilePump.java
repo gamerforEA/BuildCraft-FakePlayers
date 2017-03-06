@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftFactory;
 import buildcraft.api.core.BlockIndex;
@@ -121,7 +119,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 				if (this.getBattery().useEnergy(100, 100, false) > 0)
 				{
 					// TODO gamerforEA code start
-					if (EventUtils.cantBreak(this.fake.getPlayer(), index.x, index.y, index.z))
+					if (this.fake.cantBreak(index.x, index.y, index.z))
 						return;
 					// TODO gamerforEA code end
 

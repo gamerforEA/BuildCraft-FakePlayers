@@ -10,8 +10,6 @@ package buildcraft.core.blueprints;
 
 import java.util.LinkedList;
 
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.blueprints.SchematicBlockBase;
 import buildcraft.api.core.BuildCraftAPI;
@@ -183,7 +181,7 @@ public class BptBuilderTemplate extends BptBuilderBase
 
 			if (this.canDestroy(builder, this.context, slot))
 				// TODO gamerforEA condition replace, old code: isBlockBreakCanceled(world, slot.x, slot.y, slot.z)
-				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
+				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || builder.fake.cantBreak(slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 				// TODO gamerforEA code end
 				{
 				this.iteratorClear.remove();
@@ -221,7 +219,7 @@ public class BptBuilderTemplate extends BptBuilderBase
 			}
 
 			// TODO gamerforEA condition replace, old code: isBlockPlaceCanceled(world, slot.x, slot.y, slot.z, slot.schematic)
-			if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || EventUtils.cantBreak(builder.fake.getPlayer(), slot.x, slot.y, slot.z) || !BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
+			if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || builder.fake.cantBreak(slot.x, slot.y, slot.z) || !BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 			// TODO gamerforEA code end
 			{
 				this.iteratorBuild.remove();

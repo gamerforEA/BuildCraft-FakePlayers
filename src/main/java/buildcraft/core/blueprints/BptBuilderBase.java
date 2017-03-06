@@ -132,7 +132,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 		if (slot != null)
 		{
 			// TODO gamerforEA code start
-			EntityPlayer player = builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).fake.getPlayer() : ModUtils.getModFake(world);
+			EntityPlayer player = builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).fake.get() : ModUtils.getModFake(world);
 			int xCoord = (int) slot.getDestination().x;
 			int yCoord = (int) slot.getDestination().y;
 			int zCoord = (int) slot.getDestination().z;

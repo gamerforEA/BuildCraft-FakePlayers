@@ -14,8 +14,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.core.lib.block.TileBuildCraft;
@@ -116,7 +114,7 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 		if (this.canPlaceFluidAt(block, x, y, z))
 		{
 			// TODO gamerforEA code start
-			if (EventUtils.cantBreak(this.fake.getPlayer(), x, y, z))
+			if (this.fake.cantBreak(x, y, z))
 				return false;
 			// TODO gamerforEA code end
 

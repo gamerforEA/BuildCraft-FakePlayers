@@ -8,8 +8,6 @@
  */
 package buildcraft.robotics.ai;
 
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.robots.AIRobot;
@@ -93,7 +91,7 @@ public class AIRobotBreak extends AIRobot
 			this.blockDamage = 0;
 
 			// TODO gamerforEA add condition [1], add EntityPlayer parameter [2]
-			if (!EventUtils.cantBreak(this.robot.fake.getPlayer(), this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.harvestBlock(this.robot.fake.getPlayer(), (WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.robot.getHeldItem()))
+			if (!this.robot.fake.cantBreak(this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z) && BlockUtils.harvestBlock(this.robot.fake.get(), (WorldServer) this.robot.worldObj, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, this.robot.getHeldItem()))
 			{
 				this.robot.worldObj.playAuxSFXAtEntity(null, 2001, this.blockToBreak.x, this.blockToBreak.y, this.blockToBreak.z, Block.getIdFromBlock(this.block) + (this.meta << 12));
 

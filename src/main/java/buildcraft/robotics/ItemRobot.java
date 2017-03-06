@@ -80,7 +80,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 			EntityRobot robot = new EntityRobot(world, robotNBT);
 
 			// TODO gamerforEA code start
-			robot.fake.profile = player.getGameProfile();
+			robot.fake.setProfile(player.getGameProfile());
 			// TODO gamerforEA code end
 
 			robot.getBattery().setEnergy(getEnergy(nbt));

@@ -116,7 +116,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 			this.owner = ((EntityPlayer) entity).getDisplayName();
 
 			// TODO gamerforEA code start
-			this.fake.profile = ((EntityPlayer) entity).getGameProfile();
+			this.fake.setProfile(((EntityPlayer) entity).getGameProfile());
 			// TODO gamerforEA code end
 		}
 	}

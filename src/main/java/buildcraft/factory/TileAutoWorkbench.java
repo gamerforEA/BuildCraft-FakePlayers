@@ -365,6 +365,11 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 
 					if (StackHelper.isMatchingItem(inputInvStack, comparedStack, true, false) && inputInvStack.stackSize > this.bindingCounts[j])
 					{
+						// TODO gamerforEA code start
+						if (!ItemStack.areItemStackTagsEqual(inputInvStack, comparedStack))
+							continue;
+						// TODO gamerforEA code end
+
 						found = true;
 						this.bindings[i] = j;
 						this.bindingCounts[j]++;
@@ -406,7 +411,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		ItemStack result = this.craftMatrix.getRecipeOutput();
 
 		// TODO gamerforEA code start
-		if (EventConfig.inBlackList(EventConfig.autoCraftBlackList, result.getItem(), result.getItemDamage()))
+		if (EventConfig.inList(EventConfig.autoCraftBlackList, result.getItem(), result.getItemDamage()))
 			result = null;
 		ItemStack resultInto = this.resultInv.getStackInSlot(0);
 		if (resultInto != null && result != null && result.isItemEqual(resultInto) && !ItemStack.areItemStackTagsEqual(result, resultInto))

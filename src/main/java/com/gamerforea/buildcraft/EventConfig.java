@@ -34,20 +34,20 @@ public final class EventConfig
 		}
 	}
 
-	public static final boolean inBlackList(Set<String> blackList, Item item, int meta)
+	public static final boolean inList(Set<String> blackList, Item item, int meta)
 	{
 		if (item instanceof ItemBlock)
-			return inBlackList(blackList, ((ItemBlock) item).field_150939_a, meta);
+			return inList(blackList, ((ItemBlock) item).field_150939_a, meta);
 
-		return inBlackList(blackList, getId(item), meta);
+		return inList(blackList, getId(item), meta);
 	}
 
-	public static final boolean inBlackList(Set<String> blackList, Block block, int meta)
+	public static final boolean inList(Set<String> blackList, Block block, int meta)
 	{
-		return inBlackList(blackList, getId(block), meta);
+		return inList(blackList, getId(block), meta);
 	}
 
-	private static final boolean inBlackList(Set<String> blackList, String id, int meta)
+	private static final boolean inList(Set<String> blackList, String id, int meta)
 	{
 		return id != null && (blackList.contains(id) || blackList.contains(id + ':' + meta));
 	}

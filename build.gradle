@@ -25,7 +25,7 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "7.1.20"
+version = "7.1.21"
 group= "com.mod-buildcraft"
 archivesBaseName = "buildcraft"
 

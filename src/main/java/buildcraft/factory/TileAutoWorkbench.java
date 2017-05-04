@@ -9,12 +9,14 @@
 package buildcraft.factory;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import com.gamerforea.buildcraft.EventConfig;
 
 import buildcraft.api.core.IInvSlot;
 import buildcraft.api.power.IRedstoneEngine;
 import buildcraft.api.power.IRedstoneEngineReceiver;
+import buildcraft.api.tiles.IDebuggable;
 import buildcraft.api.tiles.IHasWork;
 import buildcraft.core.lib.RFBattery;
 import buildcraft.core.lib.block.TileBuildCraft;
@@ -40,7 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory, IHasWork, IRedstoneEngineReceiver
+public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory, IHasWork, IRedstoneEngineReceiver, IDebuggable
 {
 
 	public static final int SLOT_RESULT = 9;
@@ -52,7 +54,23 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 	public LocalInventoryCrafting craftMatrix = new LocalInventoryCrafting();
 
 	private SimpleInventory resultInv = new SimpleInventory(1, "Auto Workbench", 64);
-	private SimpleInventory inputInv = new SimpleInventory(9, "Auto Workbench", 64);
+	private SimpleInventory inputInv = new SimpleInventory(9, "Auto Workbench", 64)
+	{
+		@Override
+		public void setInventorySlotContents(int slotId, ItemStack itemstack)
+		{
+			super.setInventorySlotContents(slotId, itemstack);
+			if (TileAutoWorkbench.this.craftMatrix.isInputMissing && this.getStackInSlot(slotId) != null)
+				TileAutoWorkbench.this.craftMatrix.isInputMissing = false;
+		}
+
+		@Override
+		public void markDirty()
+		{
+			super.markDirty();
+			TileAutoWorkbench.this.craftMatrix.isInputMissing = false;
+		}
+	};
 
 	private IInventory inv = InventoryConcatenator.make().add(this.inputInv).add(this.resultInv).add(this.craftMatrix);
 
@@ -92,10 +110,17 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		return tile instanceof IRedstoneEngine;
 	}
 
+	@Override
+	public void getDebugInfo(List<String> info, ForgeDirection side, ItemStack debugger, EntityPlayer player)
+	{
+		info.add("isInputMissing = " + this.craftMatrix.isInputMissing);
+		info.add("isOutputJammed = " + this.craftMatrix.isOutputJammed);
+	}
+
 	public class LocalInventoryCrafting extends InventoryCrafting
 	{
 		public IRecipe currentRecipe;
-		public boolean useBindings, isJammed;
+		public boolean useBindings, isOutputJammed, isInputMissing;
 
 		public LocalInventoryCrafting()
 		{
@@ -150,9 +175,9 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 			ItemStack resultInto = TileAutoWorkbench.this.resultInv.getStackInSlot(0);
 
 			if (resultInto != null && (!StackHelper.canStacksMerge(resultInto, result) || resultInto.stackSize + result.stackSize > resultInto.getMaxStackSize()))
-				this.isJammed = true;
+				this.isOutputJammed = true;
 			else
-				this.isJammed = false;
+				this.isOutputJammed = false;
 		}
 
 		@Override
@@ -310,7 +335,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 			this.scheduledCacheRebuild = false;
 		}
 
-		if (this.craftMatrix.isJammed || this.craftMatrix.currentRecipe == null)
+		if (this.craftMatrix.isOutputJammed || this.craftMatrix.isInputMissing || this.craftMatrix.currentRecipe == null)
 		{
 			this.progress = 0;
 			return;
@@ -378,7 +403,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 				}
 				if (!found)
 				{
-					this.craftMatrix.isJammed = true;
+					this.craftMatrix.isInputMissing = true;
 					this.progress = 0;
 					return;
 				}
@@ -411,11 +436,14 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		ItemStack result = this.craftMatrix.getRecipeOutput();
 
 		// TODO gamerforEA code start
-		if (EventConfig.inList(EventConfig.autoCraftBlackList, result.getItem(), result.getItemDamage()))
-			result = null;
 		ItemStack resultInto = this.resultInv.getStackInSlot(0);
-		if (resultInto != null && result != null && result.isItemEqual(resultInto) && !ItemStack.areItemStackTagsEqual(result, resultInto))
-			result = null;
+		if (result != null)
+			if (result.getItem() == null)
+				result = null;
+			else if (EventConfig.inList(EventConfig.autoCraftBlackList, result.getItem(), result.getItemDamage()))
+				result = null;
+			else if (resultInto != null && result != null && result.isItemEqual(resultInto) && !ItemStack.areItemStackTagsEqual(result, resultInto))
+				result = null;
 		// TODO gamerforEA code end
 
 		if (result != null && result.stackSize > 0)

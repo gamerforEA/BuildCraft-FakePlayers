@@ -1,27 +1,25 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p>
  * The BuildCraft API is distributed under the terms of the MIT License.
  * Please check the contents of the license, which should be located
  * as "LICENSE.API" in the BuildCraft source code distribution.
  */
 package buildcraft.api.blueprints;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.gamerforea.buildcraft.EventConfig;
-
 import buildcraft.api.core.JavaTools;
+import com.gamerforea.buildcraft.EventConfig;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.Constants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class SchematicTile extends SchematicBlock
 {
@@ -73,6 +71,9 @@ public class SchematicTile extends SchematicBlock
 			this.tileNBT.setInteger("z", z);
 
 			// TODO gamerforEA code start
+			if (EventConfig.builderNbtDisable)
+				return;
+
 			NBTTagCompound originalNbt = (NBTTagCompound) this.tileNBT.copy();
 
 			Logger log = LogManager.getLogger("BuildCraftEvents");
@@ -89,6 +90,7 @@ public class SchematicTile extends SchematicBlock
 				{
 					tag = parts[parts.length - 1];
 					for (int i = 0; i < parts.length - 1; i++)
+					{
 						if (nbt.hasKey(parts[i], Constants.NBT.TAG_COMPOUND))
 							nbt = nbt.getCompoundTag(parts[i]);
 						else
@@ -96,6 +98,7 @@ public class SchematicTile extends SchematicBlock
 							nbt = null;
 							break;
 						}
+					}
 				}
 
 				if (nbt != null)
@@ -149,8 +152,10 @@ public class SchematicTile extends SchematicBlock
 				ArrayList<ItemStack> rqs = new ArrayList<ItemStack>();
 
 				for (int i = 0; i < inv.getSizeInventory(); ++i)
+				{
 					if (inv.getStackInSlot(i) != null)
 						rqs.add(inv.getStackInSlot(i));
+				}
 
 				this.storedRequirements = JavaTools.concat(this.storedRequirements, rqs.toArray(new ItemStack[rqs.size()]));
 			}

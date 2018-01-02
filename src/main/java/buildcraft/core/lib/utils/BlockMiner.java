@@ -1,12 +1,9 @@
 package buildcraft.core.lib.utils;
 
-import java.util.List;
-
-import com.gamerforea.buildcraft.ModUtils;
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.BuildCraftCore;
 import buildcraft.core.lib.block.TileBuildCraft;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,6 +12,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.List;
 
 public class BlockMiner
 {
@@ -114,8 +113,10 @@ public class BlockMiner
 
 				if (stacks != null)
 					for (ItemStack s : stacks)
+					{
 						if (s != null)
 							this.mineStack(s);
+					}
 
 				this.world.playAuxSFXAtEntity(null, 2001, this.x, this.y, this.z, Block.getIdFromBlock(block) + (meta << 12));
 

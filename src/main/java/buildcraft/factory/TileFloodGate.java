@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,12 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.factory;
-
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeMap;
 
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.core.BuildCraftAPI;
@@ -25,13 +19,9 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.BlockFluidBase;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidContainerRegistry;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidTankInfo;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.*;
+
+import java.util.*;
 
 public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 {
@@ -198,7 +188,9 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 			this.fluidsFound = new LinkedList<BlockIndex>();
 
 			for (BlockIndex index : fluidsToExpand)
+			{
 				this.queueAdjacent(index.x, index.y, index.z);
+			}
 		}
 	}
 
@@ -207,11 +199,13 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 		if (this.tank.getFluidType() == null)
 			return;
 		for (int i = 0; i < 6; i++)
+		{
 			if (i != 1 && !this.blockedSides[i])
 			{
 				ForgeDirection dir = ForgeDirection.getOrientation(i);
 				this.queueForFilling(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
 			}
+		}
 	}
 
 	public void queueForFilling(int x, int y, int z)
@@ -256,7 +250,9 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 		this.rebuildDelay = data.getByte("rebuildDelay");
 		this.powered = data.getBoolean("powered");
 		for (int i = 0; i < 6; i++)
+		{
 			this.blockedSides[i] = data.getBoolean("blocked[" + i + "]");
+		}
 	}
 
 	@Override
@@ -267,8 +263,10 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 		data.setByte("rebuildDelay", (byte) this.rebuildDelay);
 		data.setBoolean("powered", this.powered);
 		for (int i = 0; i < 6; i++)
+		{
 			if (this.blockedSides[i])
 				data.setBoolean("blocked[" + i + "]", true);
+		}
 	}
 
 	@Override
@@ -276,7 +274,9 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	{
 		byte flags = stream.readByte();
 		for (int i = 0; i < 6; i++)
+		{
 			this.blockedSides[i] = (flags & 1 << i) != 0;
+		}
 	}
 
 	@Override
@@ -284,8 +284,10 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 	{
 		byte flags = 0;
 		for (int i = 0; i < 6; i++)
+		{
 			if (this.blockedSides[i])
 				flags |= 1 << i;
+		}
 		stream.writeByte(flags);
 	}
 

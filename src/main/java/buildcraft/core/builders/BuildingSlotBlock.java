@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,25 +8,13 @@
  */
 package buildcraft.core.builders;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import com.gamerforea.buildcraft.ModUtils;
-
 import buildcraft.BuildCraftBuilders;
-import buildcraft.api.blueprints.BuildingPermission;
-import buildcraft.api.blueprints.IBuilderContext;
-import buildcraft.api.blueprints.MappingNotFoundException;
-import buildcraft.api.blueprints.MappingRegistry;
-import buildcraft.api.blueprints.SchematicBlock;
-import buildcraft.api.blueprints.SchematicBlockBase;
-import buildcraft.api.blueprints.SchematicFactory;
-import buildcraft.api.blueprints.SchematicMask;
+import buildcraft.api.blueprints.*;
 import buildcraft.api.core.BCLog;
 import buildcraft.api.core.Position;
 import buildcraft.core.blueprints.IndexRequirementMap;
 import buildcraft.core.lib.utils.BlockUtils;
+import com.gamerforea.buildcraft.ModUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -35,6 +23,10 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.Constants;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BuildingSlotBlock extends BuildingSlot
 {
@@ -46,8 +38,7 @@ public class BuildingSlotBlock extends BuildingSlot
 
 	public enum Mode
 	{
-		ClearIfInvalid,
-		Build
+		ClearIfInvalid, Build
 	}
 
 	public Mode mode = Mode.Build;
@@ -125,11 +116,13 @@ public class BuildingSlotBlock extends BuildingSlot
 					{
 						boolean contains = false;
 						for (ItemStack ss : oldRequirements)
+						{
 							if (this.getSchematic().isItemMatchingRequirement(s, ss))
 							{
 								contains = true;
 								break;
 							}
+						}
 						if (!contains)
 						{
 							BCLog.logger.warn("Blueprint has MISMATCHING REQUIREMENTS! Potential corrupted/hacked blueprint! Removed mismatched block.");
@@ -251,7 +244,9 @@ public class BuildingSlotBlock extends BuildingSlot
 		NBTTagList nbtStacks = nbt.getTagList("stackConsumed", Constants.NBT.TAG_COMPOUND);
 
 		for (int i = 0; i < nbtStacks.tagCount(); ++i)
+		{
 			this.stackConsumed.add(ItemStack.loadItemStackFromNBT(nbtStacks.getCompoundTagAt(i)));
+		}
 
 	}
 

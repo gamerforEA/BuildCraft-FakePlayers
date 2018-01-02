@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,12 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.core.builders;
-
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
-import com.gamerforea.buildcraft.ModUtils;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.IBuilderContext;
@@ -24,6 +18,7 @@ import buildcraft.core.BlockBuildTool;
 import buildcraft.core.StackAtPosition;
 import buildcraft.core.lib.block.TileBuildCraft;
 import buildcraft.core.lib.inventory.InvUtils;
+import com.gamerforea.buildcraft.ModUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,6 +29,10 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.util.Constants;
+
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BuildingItem implements IBuildingItem, ISerializable
 {
@@ -195,8 +194,10 @@ public class BuildingItem implements IBuildingItem, ISerializable
 				this.context.world().playAuxSFXAtEntity(null, 2001, destX, destY, destZ, Block.getIdFromBlock(oldBlock) + (oldMeta << 12));
 			else if (this.slotToBuild.stackConsumed != null)
 				for (ItemStack s : this.slotToBuild.stackConsumed)
+				{
 					if (s != null && !(s.getItem() instanceof ItemBlock && Block.getBlockFromItem(s.getItem()) instanceof BlockBuildTool))
 						InvUtils.dropItems(this.context.world(), s, destX, destY, destZ);
+				}
 		}
 	}
 
@@ -299,6 +300,7 @@ public class BuildingItem implements IBuildingItem, ISerializable
 	{
 		if (stacks != null)
 			for (ItemStack s : stacks)
+			{
 				for (int i = 0; i < s.stackSize; ++i)
 				{
 					StackAtPosition sPos = new StackAtPosition();
@@ -306,6 +308,7 @@ public class BuildingItem implements IBuildingItem, ISerializable
 					sPos.stack.stackSize = 1;
 					this.stacksToDisplay.add(sPos);
 				}
+			}
 	}
 
 	@Override
@@ -334,7 +337,9 @@ public class BuildingItem implements IBuildingItem, ISerializable
 		stream.writeFloat(this.lifetime);
 		stream.writeShort(this.stacksToDisplay.size());
 		for (StackAtPosition s : this.stacksToDisplay)
+		{
 			s.writeData(stream);
+		}
 	}
 
 	@Override

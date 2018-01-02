@@ -1,9 +1,8 @@
 package com.gamerforea.buildcraft;
 
+import buildcraft.BuildCraftCore;
 import com.gamerforea.eventhelper.util.FastUtils;
 import com.mojang.authlib.GameProfile;
-
-import buildcraft.BuildCraftCore;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,8 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.core.blueprints;
-
-import java.util.LinkedList;
 
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.blueprints.SchematicBlockBase;
@@ -24,6 +22,8 @@ import buildcraft.core.lib.utils.BlockUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.LinkedList;
 
 public class BptBuilderTemplate extends BptBuilderBase
 {
@@ -115,10 +115,7 @@ public class BptBuilderTemplate extends BptBuilderBase
 
 	private void checkDone()
 	{
-		if (this.buildList.size() == 0 && this.clearList.size() == 0)
-			this.done = true;
-		else
-			this.done = false;
+		this.done = this.buildList.size() == 0 && this.clearList.size() == 0;
 	}
 
 	@Override
@@ -184,18 +181,18 @@ public class BptBuilderTemplate extends BptBuilderBase
 				if (BlockUtils.isUnbreakableBlock(world, slot.x, slot.y, slot.z) || builder.fake.cantBreak(slot.x, slot.y, slot.z) || BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z))
 				// TODO gamerforEA code end
 				{
-				this.iteratorClear.remove();
-				this.markLocationUsed(slot.x, slot.y, slot.z);
+					this.iteratorClear.remove();
+					this.markLocationUsed(slot.x, slot.y, slot.z);
 				}
 				else
 				{
-				this.consumeEnergyToDestroy(builder, slot);
-				this.createDestroyItems(slot);
+					this.consumeEnergyToDestroy(builder, slot);
+					this.createDestroyItems(slot);
 
-				result = slot;
-				this.iteratorClear.remove();
-				this.markLocationUsed(slot.x, slot.y, slot.z);
-				break;
+					result = slot;
+					this.iteratorClear.remove();
+					this.markLocationUsed(slot.x, slot.y, slot.z);
+					break;
 				}
 		}
 

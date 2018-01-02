@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,10 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.transport.pipes;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 
 import buildcraft.BuildCraftTransport;
 import buildcraft.api.core.IIconProvider;
@@ -43,6 +39,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidBlock;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 
 public class PipeItemsStripes extends Pipe<PipeTransportItems> implements IEnergyHandler, IStripesPipe
 {
@@ -93,16 +93,20 @@ public class PipeItemsStripes extends Pipe<PipeTransportItems> implements IEnerg
 					// TODO gamerforEA code end
 
 					for (IStripesHandler handler : PipeManager.stripesHandlers)
+					{
 						if (handler.getType() == StripesHandlerType.BLOCK_BREAK && handler.shouldHandle(stack))
 							if (handler.handle(this.getWorld(), (int) p.x, (int) p.y, (int) p.z, o, stack, player, this))
 								return;
+					}
 
 					ArrayList<ItemStack> stacks = block.getDrops(this.getWorld(), (int) p.x, (int) p.y, (int) p.z, metadata, 0);
 
 					if (stacks != null)
 						for (ItemStack s : stacks)
+						{
 							if (s != null)
 								this.sendItem(s, o.getOpposite());
+						}
 
 					this.getWorld().setBlockToAir((int) p.x, (int) p.y, (int) p.z);
 				}
@@ -161,12 +165,14 @@ public class PipeItemsStripes extends Pipe<PipeTransportItems> implements IEnerg
 		 * Check if there's a handler for this item type.
 		 */
 		for (IStripesHandler handler : PipeManager.stripesHandlers)
+		{
 			if (handler.getType() == StripesHandlerType.ITEM_USE && handler.shouldHandle(stack))
 				if (handler.handle(this.getWorld(), (int) p.x, (int) p.y, (int) p.z, direction, stack, player, this))
 				{
 					event.entity = null;
 					return;
 				}
+		}
 	}
 
 	@Override
@@ -183,8 +189,10 @@ public class PipeItemsStripes extends Pipe<PipeTransportItems> implements IEnerg
 	{
 		LinkedList<IActionInternal> action = super.getActions();
 		for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS)
+		{
 			if (!this.container.isPipeConnected(direction))
 				action.add(BuildCraftTransport.actionPipeDirection[direction.ordinal()]);
+		}
 		return action;
 	}
 
@@ -196,11 +204,13 @@ public class PipeItemsStripes extends Pipe<PipeTransportItems> implements IEnerg
 		this.actionDir = ForgeDirection.UNKNOWN;
 
 		for (StatementSlot action : actions)
+		{
 			if (action.statement instanceof ActionPipeDirection)
 			{
 				this.actionDir = ((ActionPipeDirection) action.statement).direction;
 				break;
 			}
+		}
 	}
 
 	@Override

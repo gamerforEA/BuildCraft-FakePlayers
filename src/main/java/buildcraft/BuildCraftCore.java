@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,77 +8,21 @@
  */
 package buildcraft;
 
-import java.io.File;
-import java.util.UUID;
-
-import com.gamerforea.buildcraft.EventConfig;
-import com.mojang.authlib.GameProfile;
-
 import buildcraft.api.blueprints.BuilderAPI;
-import buildcraft.api.core.BCLog;
-import buildcraft.api.core.BuildCraftAPI;
-import buildcraft.api.core.EnumColor;
-import buildcraft.api.core.IIconProvider;
-import buildcraft.api.core.IWorldProperty;
+import buildcraft.api.core.*;
 import buildcraft.api.crops.CropManager;
 import buildcraft.api.filler.FillerManager;
 import buildcraft.api.filler.IFillerPattern;
 import buildcraft.api.lists.ListRegistry;
 import buildcraft.api.recipes.BuildcraftRecipeRegistry;
-import buildcraft.api.statements.IActionExternal;
-import buildcraft.api.statements.IActionInternal;
-import buildcraft.api.statements.IStatement;
-import buildcraft.api.statements.ITriggerExternal;
-import buildcraft.api.statements.ITriggerInternal;
-import buildcraft.api.statements.StatementManager;
-import buildcraft.api.statements.StatementParameterItemStack;
+import buildcraft.api.statements.*;
 import buildcraft.api.tablet.TabletAPI;
 import buildcraft.api.tiles.IControllable;
-import buildcraft.core.AchievementManager;
-import buildcraft.core.BCCreativeTab;
-import buildcraft.core.BCRegistry;
-import buildcraft.core.BlockBuildTool;
-import buildcraft.core.BlockEngine;
-import buildcraft.core.BlockMarker;
-import buildcraft.core.BlockPathMarker;
-import buildcraft.core.BlockSpring;
-import buildcraft.core.CompatHooks;
-import buildcraft.core.CoreGuiHandler;
-import buildcraft.core.CoreIconProvider;
-import buildcraft.core.CoreSiliconRecipes;
-import buildcraft.core.DefaultProps;
-import buildcraft.core.InterModComms;
-import buildcraft.core.ItemDebugger;
-import buildcraft.core.ItemGear;
-import buildcraft.core.ItemList;
-import buildcraft.core.ItemMapLocation;
-import buildcraft.core.ItemPaintbrush;
-import buildcraft.core.ItemSpring;
-import buildcraft.core.ItemWrench;
-import buildcraft.core.SchematicEngine;
-import buildcraft.core.SpringPopulate;
-import buildcraft.core.TickHandlerCore;
-import buildcraft.core.TileEngineWood;
-import buildcraft.core.TilePathMarker;
-import buildcraft.core.Version;
+import buildcraft.core.*;
 import buildcraft.core.blueprints.BuildingSlotMapIterator;
 import buildcraft.core.blueprints.SchematicHelper;
 import buildcraft.core.blueprints.SchematicRegistry;
-import buildcraft.core.builders.patterns.FillerPattern;
-import buildcraft.core.builders.patterns.FillerRegistry;
-import buildcraft.core.builders.patterns.PatternBox;
-import buildcraft.core.builders.patterns.PatternClear;
-import buildcraft.core.builders.patterns.PatternCylinder;
-import buildcraft.core.builders.patterns.PatternFill;
-import buildcraft.core.builders.patterns.PatternFlatten;
-import buildcraft.core.builders.patterns.PatternFrame;
-import buildcraft.core.builders.patterns.PatternHorizon;
-import buildcraft.core.builders.patterns.PatternParameterCenter;
-import buildcraft.core.builders.patterns.PatternParameterHollow;
-import buildcraft.core.builders.patterns.PatternParameterXZDir;
-import buildcraft.core.builders.patterns.PatternParameterYDir;
-import buildcraft.core.builders.patterns.PatternPyramid;
-import buildcraft.core.builders.patterns.PatternStairs;
+import buildcraft.core.builders.patterns.*;
 import buildcraft.core.builders.schematics.SchematicIgnore;
 import buildcraft.core.command.SubCommandChangelog;
 import buildcraft.core.command.SubCommandDeop;
@@ -97,24 +41,9 @@ import buildcraft.core.lib.utils.ColorUtils;
 import buildcraft.core.lib.utils.NBTUtils;
 import buildcraft.core.lib.utils.Utils;
 import buildcraft.core.lib.utils.XorShift128Random;
-import buildcraft.core.list.ListMatchHandlerArmor;
-import buildcraft.core.list.ListMatchHandlerClass;
-import buildcraft.core.list.ListMatchHandlerFluid;
-import buildcraft.core.list.ListMatchHandlerOreDictionary;
-import buildcraft.core.list.ListMatchHandlerTools;
-import buildcraft.core.list.ListOreDictionaryCache;
-import buildcraft.core.list.ListTooltipHandler;
+import buildcraft.core.list.*;
 import buildcraft.core.network.PacketHandlerCore;
-import buildcraft.core.properties.WorldPropertyIsDirt;
-import buildcraft.core.properties.WorldPropertyIsFarmland;
-import buildcraft.core.properties.WorldPropertyIsFluidSource;
-import buildcraft.core.properties.WorldPropertyIsHarvestable;
-import buildcraft.core.properties.WorldPropertyIsLeaf;
-import buildcraft.core.properties.WorldPropertyIsOre;
-import buildcraft.core.properties.WorldPropertyIsReplaceable;
-import buildcraft.core.properties.WorldPropertyIsShoveled;
-import buildcraft.core.properties.WorldPropertyIsSoft;
-import buildcraft.core.properties.WorldPropertyIsWood;
+import buildcraft.core.properties.*;
 import buildcraft.core.proxy.CoreProxy;
 import buildcraft.core.recipes.AssemblyRecipeManager;
 import buildcraft.core.recipes.IntegrationRecipeManager;
@@ -123,35 +52,19 @@ import buildcraft.core.recipes.RefineryRecipeManager;
 import buildcraft.core.render.BlockHighlightHandler;
 import buildcraft.core.render.RenderLEDTile;
 import buildcraft.core.render.RenderLaser;
-import buildcraft.core.statements.ActionMachineControl;
-import buildcraft.core.statements.ActionRedstoneOutput;
-import buildcraft.core.statements.DefaultActionProvider;
-import buildcraft.core.statements.DefaultTriggerProvider;
-import buildcraft.core.statements.StatementParameterDirection;
-import buildcraft.core.statements.StatementParameterItemStackExact;
-import buildcraft.core.statements.StatementParameterRedstoneGateSideOnly;
-import buildcraft.core.statements.TriggerEnergy;
-import buildcraft.core.statements.TriggerFluidContainer;
-import buildcraft.core.statements.TriggerFluidContainerLevel;
-import buildcraft.core.statements.TriggerInventory;
-import buildcraft.core.statements.TriggerInventoryLevel;
-import buildcraft.core.statements.TriggerMachine;
-import buildcraft.core.statements.TriggerRedstoneInput;
+import buildcraft.core.statements.*;
 import buildcraft.core.tablet.ItemTablet;
 import buildcraft.core.tablet.PacketTabletMessage;
 import buildcraft.core.tablet.TabletProgramMenuFactory;
 import buildcraft.core.tablet.manager.TabletManagerClient;
 import buildcraft.core.tablet.manager.TabletManagerServer;
+import com.gamerforea.buildcraft.EventConfig;
+import com.mojang.authlib.GameProfile;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLInterModComms;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.event.FMLServerStoppingEvent;
+import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -173,9 +86,16 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.oredict.OreDictionary;
 
-@Mod(name = "BuildCraft", version = Version.VERSION, useMetadata = false, modid = "BuildCraft|Core",
-		acceptedMinecraftVersions = "[1.7.10,1.8)", dependencies = "required-after:Forge@[10.13.2.1236,)",
-		guiFactory = "buildcraft.core.config.ConfigManager")
+import java.io.File;
+import java.util.UUID;
+
+@Mod(name = "BuildCraft",
+	 version = Version.VERSION,
+	 useMetadata = false,
+	 modid = "BuildCraft|Core",
+	 acceptedMinecraftVersions = "[1.7.10,1.8)",
+	 dependencies = "required-after:Forge@[10.13.2.1236,)",
+	 guiFactory = "buildcraft.core.config.ConfigManager")
 public class BuildCraftCore extends BuildCraftMod
 {
 	@Mod.Instance("BuildCraft|Core")
@@ -185,8 +105,7 @@ public class BuildCraftCore extends BuildCraftMod
 
 	public enum RenderMode
 	{
-		Full,
-		NoDynamic
+		Full, NoDynamic
 	}
 
 	public static RootCommand commandBuildcraft = new RootCommand("buildcraft");
@@ -279,7 +198,7 @@ public class BuildCraftCore extends BuildCraftMod
 	public void loadConfiguration(FMLPreInitializationEvent evt)
 	{
 		BCLog.logger.info("Starting BuildCraft " + Version.getVersion());
-		BCLog.logger.info("Copyright (c) the BuildCraft team, 2011-2015");
+		BCLog.logger.info("Copyright (c) the BuildCraft team, 2011-2017");
 		BCLog.logger.info("http://www.mod-buildcraft.com");
 
 		new BCCreativeTab("main");
@@ -526,7 +445,9 @@ public class BuildCraftCore extends BuildCraftMod
 		BuildCraftAPI.registerWorldProperty("wood", new WorldPropertyIsWood());
 		BuildCraftAPI.registerWorldProperty("leaves", new WorldPropertyIsLeaf());
 		for (int i = 0; i < 4; i++)
+		{
 			BuildCraftAPI.registerWorldProperty("ore@hardness=" + i, new WorldPropertyIsOre(i));
+		}
 		BuildCraftAPI.registerWorldProperty("harvestable", new WorldPropertyIsHarvestable());
 		BuildCraftAPI.registerWorldProperty("farmland", new WorldPropertyIsFarmland());
 		BuildCraftAPI.registerWorldProperty("shoveled", new WorldPropertyIsShoveled());
@@ -541,12 +462,16 @@ public class BuildCraftCore extends BuildCraftMod
 
 		actionControl = new IActionExternal[IControllable.Mode.values().length];
 		for (IControllable.Mode mode : IControllable.Mode.values())
+		{
 			if (mode != IControllable.Mode.Unknown && mode != IControllable.Mode.Mode)
 				actionControl[mode.ordinal()] = new ActionMachineControl(mode);
+		}
 
 		MinecraftForge.EVENT_BUS.register(ListOreDictionaryCache.INSTANCE);
 		for (String s : OreDictionary.getOreNames())
+		{
 			ListOreDictionaryCache.INSTANCE.registerName(s);
+		}
 
 		ListRegistry.registerHandler(new ListMatchHandlerOreDictionary());
 	}
@@ -602,7 +527,9 @@ public class BuildCraftCore extends BuildCraftMod
 	public void textureHook(TextureStitchEvent.Pre event)
 	{
 		for (FillerPattern pattern : FillerPattern.patterns.values())
+		{
 			pattern.registerIcons(event.map);
+		}
 
 		if (event.map.getTextureType() == 1)
 		{
@@ -720,7 +647,9 @@ public class BuildCraftCore extends BuildCraftMod
 	public void cleanRegistries(WorldEvent.Unload event)
 	{
 		for (IWorldProperty property : BuildCraftAPI.worldProperties.values())
+		{
 			property.clear();
+		}
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
 			TilePathMarker.clearAvailableMarkersList(event.world);
 	}

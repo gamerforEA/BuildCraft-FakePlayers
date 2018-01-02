@@ -35,7 +35,9 @@ public class AchievementManager
 		int damage = event.crafting.getItemDamage();
 
 		for (Achievement a : this.page.getAchievements())
+		{
 			if (item.equals(a.theItemStack.getItem()) && damage == a.theItemStack.getItemDamage())
 				event.player.addStat(a, 1);
+		}
 	}
 }

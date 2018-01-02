@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,39 +8,18 @@
  */
 package buildcraft.core.blueprints;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map.Entry;
-
-import com.gamerforea.buildcraft.ModUtils;
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.api.blueprints.Schematic;
 import buildcraft.api.blueprints.SchematicBlock;
 import buildcraft.api.blueprints.SchematicEntity;
-import buildcraft.api.core.BCLog;
-import buildcraft.api.core.BlockIndex;
-import buildcraft.api.core.BuildCraftAPI;
-import buildcraft.api.core.IInvSlot;
-import buildcraft.api.core.StackKey;
-import buildcraft.core.builders.BuilderItemMetaPair;
-import buildcraft.core.builders.BuildingSlot;
-import buildcraft.core.builders.BuildingSlotBlock;
+import buildcraft.api.core.*;
+import buildcraft.core.builders.*;
 import buildcraft.core.builders.BuildingSlotBlock.Mode;
-import buildcraft.core.builders.BuildingSlotEntity;
-import buildcraft.core.builders.IBuildingItemsProvider;
-import buildcraft.core.builders.TileAbstractBuilder;
 import buildcraft.core.lib.inventory.InventoryCopy;
 import buildcraft.core.lib.inventory.InventoryIterator;
 import buildcraft.core.lib.utils.BlockUtils;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -54,6 +33,9 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class BptBuilderBlueprint extends BptBuilderBase
 {
@@ -174,9 +156,13 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		}
 
 		for (BuildingSlotBlock b : tmpStandalone)
+		{
 			this.addToBuildList(b);
+		}
 		for (BuildingSlotBlock b : tmpExpanding)
+		{
 			this.addToBuildList(b);
+		}
 
 		int seqId = 0;
 
@@ -203,7 +189,9 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		this.initialize();
 
 		for (List<BuildingSlotBlock> lb : this.buildList.values())
+		{
 			for (BuildingSlotBlock b : lb)
+			{
 				if (b.mode == Mode.ClearIfInvalid)
 					this.context.world.setBlockToAir(b.x, b.y, b.z);
 				else if (!b.schematic.doNotBuild())
@@ -213,8 +201,10 @@ public class BptBuilderBlueprint extends BptBuilderBase
 					try
 					{
 						for (ItemStack stk : b.getRequirements(this.context))
+						{
 							if (stk != null)
 								b.stackConsumed.add(stk.copy());
+						}
 					}
 					catch (Throwable t)
 					{
@@ -225,6 +215,8 @@ public class BptBuilderBlueprint extends BptBuilderBase
 
 					b.writeToWorld(this.context);
 				}
+			}
+		}
 
 		for (BuildingSlotEntity e : this.entityList)
 		{
@@ -233,8 +225,10 @@ public class BptBuilderBlueprint extends BptBuilderBase
 			try
 			{
 				for (ItemStack stk : e.getRequirements(this.context))
+				{
 					if (stk != null)
 						e.stackConsumed.add(stk.copy());
+				}
 			}
 			catch (Throwable t)
 			{
@@ -247,20 +241,23 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		}
 
 		for (List<BuildingSlotBlock> lb : this.buildList.values())
+		{
 			for (BuildingSlotBlock b : lb)
+			{
 				if (b.mode != Mode.ClearIfInvalid)
 					b.postProcessing(this.context);
+			}
+		}
 
 		for (BuildingSlotEntity e : this.entityList)
+		{
 			e.postProcessing(this.context);
+		}
 	}
 
 	private void checkDone()
 	{
-		if (this.getBuildListCount() == 0 && this.entityList.size() == 0)
-			this.done = true;
-		else
-			this.done = false;
+		this.done = this.getBuildListCount() == 0 && this.entityList.size() == 0;
 	}
 
 	private int getBuildListCount()
@@ -268,7 +265,9 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		int out = 0;
 		if (this.buildStageOccurences != null)
 			for (int buildStageOccurence : this.buildStageOccurences)
+			{
 				out += buildStageOccurence;
+			}
 		return out;
 	}
 
@@ -366,12 +365,14 @@ public class BptBuilderBlueprint extends BptBuilderBase
 			boolean skipped = false;
 
 			for (int i = 0; i < slot.buildStage; i++)
+			{
 				if (this.buildStageOccurences[i] > 0)
 				{
 					this.iterator.skipKey();
 					skipped = true;
 					break;
 				}
+			}
 
 			if (skipped)
 				continue;
@@ -446,7 +447,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 					{
 						if (!BuildCraftAPI.isSoftBlock(world, slot.x, slot.y, slot.z) || this.requirementMap.contains(new BlockIndex(slot.x, slot.y, slot.z)))
 							continue; // Can't build yet, wait (#2751)
-						// TODO gamerforEA condition replace, old code: isBlockPlaceCanceled(world, slot.x, slot.y, slot.z, slot.schematic)
+							// TODO gamerforEA condition replace, old code: isBlockPlaceCanceled(world, slot.x, slot.y, slot.z, slot.schematic)
 						else if (builder.fake.cantBreak(slot.x, slot.y, slot.z))
 						// TODO gamerforEA code end
 						{
@@ -535,8 +536,10 @@ public class BptBuilderBlueprint extends BptBuilderBase
 			slot.getRequirementsForPlacement(this.context, req);
 
 			for (ItemStack stk : req)
+			{
 				if (stk != null)
 					tmpReq.add(stk.copy());
+			}
 		}
 		catch (Throwable t)
 		{
@@ -550,7 +553,9 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		if (this.context.world().getWorldInfo().getGameType() == GameType.CREATIVE)
 		{
 			for (ItemStack s : tmpReq)
+			{
 				stacksUsed.add(s);
+			}
 
 			return !(builder.energyAvailable() < slot.getEnergyRequirement(stacksUsed));
 		}
@@ -613,8 +618,10 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		try
 		{
 			for (ItemStack stk : slot.getRequirements(this.context))
+			{
 				if (stk != null)
 					tmpReq.add(stk.copy());
+			}
 		}
 		catch (Throwable t)
 		{
@@ -627,7 +634,9 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		if (this.context.world().getWorldInfo().getGameType() == GameType.CREATIVE)
 		{
 			for (ItemStack s : tmpReq)
+			{
 				slot.addStackConsumed(s);
+			}
 
 			return;
 		}
@@ -780,6 +789,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		HashMap<StackKey, Integer> computeStacks = new HashMap<StackKey, Integer>();
 
 		for (List<BuildingSlotBlock> lb : this.buildList.values())
+		{
 			for (BuildingSlotBlock slot : lb)
 			{
 				if (slot == null)
@@ -816,6 +826,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 					}
 				}
 			}
+		}
 
 		for (BuildingSlotEntity slot : this.entityList)
 		{
@@ -853,7 +864,9 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		}
 
 		for (Entry<StackKey, Integer> e : computeStacks.entrySet())
+		{
 			this.neededItems.add(new RequirementItemStack(e.getKey().stack.copy(), e.getValue()));
+		}
 
 		this.sortNeededItems();
 	}
@@ -862,6 +875,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 	public void postProcessing(World world)
 	{
 		for (BuildingSlot s : this.postProcessing)
+		{
 			try
 			{
 				s.postProcessing(this.context);
@@ -872,6 +886,7 @@ public class BptBuilderBlueprint extends BptBuilderBase
 				t.printStackTrace();
 				BCLog.logger.throwing(t);
 			}
+		}
 	}
 
 	@Override
@@ -900,6 +915,8 @@ public class BptBuilderBlueprint extends BptBuilderBase
 		int[] entitiesBuiltArr = nbt.getIntArray("builtEntities");
 
 		for (int i = 0; i < entitiesBuiltArr.length; ++i)
+		{
 			this.builtEntities.add(i);
+		}
 	}
 }

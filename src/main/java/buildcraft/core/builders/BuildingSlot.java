@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,9 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.core.builders;
-
-import java.util.LinkedList;
-import java.util.List;
 
 import buildcraft.api.blueprints.IBuilderContext;
 import buildcraft.api.blueprints.MappingNotFoundException;
@@ -19,6 +16,9 @@ import buildcraft.api.core.Position;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class BuildingSlot
 {

@@ -1,20 +1,19 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p>
  * The BuildCraft API is distributed under the terms of the MIT License.
  * Please check the contents of the license, which should be located
  * as "LICENSE.API" in the BuildCraft source code distribution.
  */
 package buildcraft.api.robots;
 
-import com.gamerforea.buildcraft.ModUtils;
-import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
-
 import buildcraft.api.boards.RedstoneBoardRobot;
 import buildcraft.api.core.IZone;
 import cofh.api.energy.IEnergyStorage;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.inventory.IInventory;

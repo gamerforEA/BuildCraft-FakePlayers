@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,11 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.factory;
-
-import java.lang.ref.WeakReference;
-import java.util.List;
-
-import com.gamerforea.buildcraft.EventConfig;
 
 import buildcraft.api.core.IInvSlot;
 import buildcraft.api.power.IRedstoneEngine;
@@ -21,20 +16,13 @@ import buildcraft.api.tiles.IHasWork;
 import buildcraft.core.lib.RFBattery;
 import buildcraft.core.lib.block.TileBuildCraft;
 import buildcraft.core.lib.gui.ContainerDummy;
-import buildcraft.core.lib.inventory.InvUtils;
-import buildcraft.core.lib.inventory.InventoryConcatenator;
-import buildcraft.core.lib.inventory.InventoryIterator;
-import buildcraft.core.lib.inventory.SimpleInventory;
-import buildcraft.core.lib.inventory.StackHelper;
+import buildcraft.core.lib.inventory.*;
 import buildcraft.core.lib.utils.CraftingUtils;
 import buildcraft.core.lib.utils.Utils;
 import buildcraft.core.proxy.CoreProxy;
+import com.gamerforea.buildcraft.EventConfig;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
@@ -42,7 +30,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory, IHasWork, IRedstoneEngineReceiver, IDebuggable
+import java.lang.ref.WeakReference;
+import java.util.List;
+
+public class TileAutoWorkbench extends TileBuildCraft
+		implements ISidedInventory, IHasWork, IRedstoneEngineReceiver, IDebuggable
 {
 
 	public static final int SLOT_RESULT = 9;
@@ -87,7 +79,6 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 
 	public TileAutoWorkbench()
 	{
-		super();
 		this.setBattery(new RFBattery(16, 16, 0));
 	}
 
@@ -174,10 +165,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 			ItemStack result = this.getRecipeOutput();
 			ItemStack resultInto = TileAutoWorkbench.this.resultInv.getStackInSlot(0);
 
-			if (resultInto != null && (!StackHelper.canStacksMerge(resultInto, result) || resultInto.stackSize + result.stackSize > resultInto.getMaxStackSize()))
-				this.isOutputJammed = true;
-			else
-				this.isOutputJammed = false;
+			this.isOutputJammed = resultInto != null && (!StackHelper.canStacksMerge(resultInto, result) || resultInto.stackSize + result.stackSize > resultInto.getMaxStackSize());
 		}
 
 		@Override
@@ -368,7 +356,9 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		this.progress += UPDATE_TIME;
 
 		for (int i = 0; i < 9; i++)
+		{
 			this.bindingCounts[i] = 0;
+		}
 		for (int i = 0; i < 9; i++)
 		{
 			ItemStack comparedStack = this.craftMatrix.getStackInSlot(i);
@@ -413,6 +403,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 		}
 
 		for (int i = 0; i < 9; i++)
+		{
 			if (this.bindingCounts[i] > 0)
 			{
 				ItemStack stack = this.inputInv.getStackInSlot(i);
@@ -421,11 +412,14 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 					// Do not break progress yet, instead give it a chance to rebuild
 					// It will quit when trying to find a valid binding to "fit in"
 					for (int j = 0; j < 9; j++)
+					{
 						if (this.bindings[j] == i)
 							this.bindings[j] = -1;
+					}
 					return;
 				}
 			}
+		}
 
 		if (this.progress < CRAFT_TIME)
 			return;
@@ -477,9 +471,7 @@ public class TileAutoWorkbench extends TileBuildCraft implements ISidedInventory
 	{
 		if (slot == SLOT_RESULT)
 			return false;
-		if (stack.getItem().hasContainerItem(stack))
-			return false;
-		return true;
+		return !stack.getItem().hasContainerItem(stack);
 	}
 
 	@Override

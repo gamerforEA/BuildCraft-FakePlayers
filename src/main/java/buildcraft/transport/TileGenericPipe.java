@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,29 +8,13 @@
  */
 package buildcraft.transport;
 
-import java.util.List;
-
-import org.apache.logging.log4j.Level;
-
-import com.gamerforea.buildcraft.ModUtils;
-import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
-
 import buildcraft.BuildCraftCore;
 import buildcraft.BuildCraftTransport;
-import buildcraft.api.core.BCLog;
-import buildcraft.api.core.EnumColor;
-import buildcraft.api.core.IIconProvider;
-import buildcraft.api.core.ISerializable;
-import buildcraft.api.core.Position;
+import buildcraft.api.core.*;
 import buildcraft.api.gates.IGateExpansion;
 import buildcraft.api.power.IRedstoneEngineReceiver;
 import buildcraft.api.tiles.IDebuggable;
-import buildcraft.api.transport.IPipe;
-import buildcraft.api.transport.IPipeConnection;
-import buildcraft.api.transport.IPipeTile;
-import buildcraft.api.transport.PipeManager;
-import buildcraft.api.transport.PipeWire;
+import buildcraft.api.transport.*;
 import buildcraft.api.transport.pluggable.IFacadePluggable;
 import buildcraft.api.transport.pluggable.PipePluggable;
 import buildcraft.core.DefaultProps;
@@ -47,6 +31,9 @@ import buildcraft.transport.gates.GateFactory;
 import buildcraft.transport.gates.GatePluggable;
 import buildcraft.transport.pluggable.PlugPluggable;
 import cofh.api.energy.IEnergyHandler;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
@@ -65,8 +52,13 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidHandler;
+import org.apache.logging.log4j.Level;
 
-public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeTile, ITileBufferHolder, IEnergyHandler, IDropControlInventory, ISyncedTile, ISolidSideTile, IGuiReturnHandler, IRedstoneEngineReceiver, IDebuggable, IPipeConnection
+import java.util.List;
+
+public class TileGenericPipe extends TileEntity
+		implements IFluidHandler, IPipeTile, ITileBufferHolder, IEnergyHandler, IDropControlInventory, ISyncedTile,
+		ISolidSideTile, IGuiReturnHandler, IRedstoneEngineReceiver, IDebuggable, IPipeConnection
 {
 	public boolean initialized = false;
 	public final PipeRenderState renderState = new PipeRenderState();
@@ -186,30 +178,30 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 				if (nbt.hasKey("facadeState[" + i + "]"))
 					pluggable = new FacadePluggable(FacadeState.readArray(nbt.getTagList("facadeState[" + i + "]", Constants.NBT.TAG_COMPOUND)));
 				else // Migration support for 5.0.x and 6.0.x
-				if (nbt.hasKey("facadeBlocks[" + i + "]"))
-				{
-					// 5.0.x
-					Block block = (Block) Block.blockRegistry.getObjectById(nbt.getInteger("facadeBlocks[" + i + "]"));
-					int blockId = nbt.getInteger("facadeBlocks[" + i + "]");
+					if (nbt.hasKey("facadeBlocks[" + i + "]"))
+					{
+						// 5.0.x
+						Block block = (Block) Block.blockRegistry.getObjectById(nbt.getInteger("facadeBlocks[" + i + "]"));
+						int blockId = nbt.getInteger("facadeBlocks[" + i + "]");
 
-					if (blockId != 0)
-					{
-						int metadata = nbt.getInteger("facadeMeta[" + i + "]");
-						pluggable = new FacadePluggable(new FacadeState[] { FacadeState.create(block, metadata) });
+						if (blockId != 0)
+						{
+							int metadata = nbt.getInteger("facadeMeta[" + i + "]");
+							pluggable = new FacadePluggable(new FacadeState[] { FacadeState.create(block, metadata) });
+						}
 					}
-				}
-				else if (nbt.hasKey("facadeBlocksStr[" + i + "][0]"))
-				{
-					// 6.0.x
-					FacadeState mainState = FacadeState.create((Block) Block.blockRegistry.getObject(nbt.getString("facadeBlocksStr[" + i + "][0]")), nbt.getInteger("facadeMeta[" + i + "][0]"));
-					if (nbt.hasKey("facadeBlocksStr[" + i + "][1]"))
+					else if (nbt.hasKey("facadeBlocksStr[" + i + "][0]"))
 					{
-						FacadeState phasedState = FacadeState.create((Block) Block.blockRegistry.getObject(nbt.getString("facadeBlocksStr[" + i + "][1]")), nbt.getInteger("facadeMeta[" + i + "][1]"), PipeWire.fromOrdinal(nbt.getInteger("facadeWires[" + i + "]")));
-						pluggable = new FacadePluggable(new FacadeState[] { mainState, phasedState });
+						// 6.0.x
+						FacadeState mainState = FacadeState.create((Block) Block.blockRegistry.getObject(nbt.getString("facadeBlocksStr[" + i + "][0]")), nbt.getInteger("facadeMeta[" + i + "][0]"));
+						if (nbt.hasKey("facadeBlocksStr[" + i + "][1]"))
+						{
+							FacadeState phasedState = FacadeState.create((Block) Block.blockRegistry.getObject(nbt.getString("facadeBlocksStr[" + i + "][1]")), nbt.getInteger("facadeMeta[" + i + "][1]"), PipeWire.fromOrdinal(nbt.getInteger("facadeWires[" + i + "]")));
+							pluggable = new FacadePluggable(new FacadeState[] { mainState, phasedState });
+						}
+						else
+							pluggable = new FacadePluggable(new FacadeState[] { mainState });
 					}
-					else
-						pluggable = new FacadePluggable(new FacadeState[] { mainState });
-				}
 
 				if (nbt.getBoolean("plug[" + i + "]"))
 					pluggable = new PlugPluggable();
@@ -223,7 +215,9 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 		{
 			PipePluggable[] newPluggables = new PipePluggable[ForgeDirection.VALID_DIRECTIONS.length];
 			for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS)
+			{
 				newPluggables[dir.getRotation(ForgeDirection.UP).ordinal()] = this.pluggables[dir.ordinal()];
+			}
 			this.pluggables = newPluggables;
 		}
 
@@ -239,7 +233,9 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 					ItemStack[] stacks = pluggable.getDropItems(pipe);
 					if (stacks != null)
 						for (ItemStack stack : stacks)
+						{
 							Utils.dropTryIntoPlayerInventory(pipe.worldObj, pipe.xCoord, pipe.yCoord, pipe.zCoord, stack, player);
+						}
 				}
 				result = true;
 			}
@@ -249,8 +245,10 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 		public void invalidate()
 		{
 			for (PipePluggable p : this.pluggables)
+			{
 				if (p != null)
 					p.invalidate();
+			}
 		}
 
 		public void validate(TileGenericPipe pipe)
@@ -397,11 +395,13 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 			this.attachPluggables = false;
 			// Attach callback
 			for (int i = 0; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
+			{
 				if (this.sideProperties.pluggables[i] != null)
 				{
 					this.pipe.eventBus.registerHandler(this.sideProperties.pluggables[i]);
 					this.sideProperties.pluggables[i].onAttachedPipe(this, ForgeDirection.getOrientation(i));
 				}
+			}
 			this.notifyBlockChanged();
 		}
 
@@ -428,11 +428,13 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 		if (this.blockNeighborChange)
 		{
 			for (int i = 0; i < 6; i++)
+			{
 				if ((this.blockNeighborChangedSides & 1 << i) != 0)
 				{
 					this.blockNeighborChangedSides ^= 1 << i;
 					this.computeConnection(ForgeDirection.getOrientation(i));
 				}
+			}
 			this.pipe.onNeighborBlockChange(0);
 			this.blockNeighborChange = false;
 			this.refreshRenderState = true;
@@ -504,7 +506,9 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 
 		// Pipe connections;
 		for (ForgeDirection o : ForgeDirection.VALID_DIRECTIONS)
+		{
 			this.renderState.pipeConnectionMatrix.setConnected(o, this.pipeConnectionsBuffer[o.ordinal()]);
+		}
 
 		// Pipe Textures
 		for (int i = 0; i < 7; i++)
@@ -519,7 +523,9 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 			this.renderState.wireMatrix.setWire(color, this.pipe.wireSet[color.ordinal()]);
 
 			for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS)
+			{
 				this.renderState.wireMatrix.setWireConnected(color, direction, this.pipe.isWireConnectedTo(this.getTile(direction), color, direction));
+			}
 
 			boolean lit = this.pipe.wireSignalStrength[color.ordinal()] > 0;
 
@@ -795,10 +801,8 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 	/**
 	 * Checks if this tile can connect to another tile
 	 *
-	 * @param with
-	 *            - The other Tile
-	 * @param side
-	 *            - The orientation to get to the other tile ('with')
+	 * @param with - The other Tile
+	 * @param side - The orientation to get to the other tile ('with')
 	 * @return true if pipes are considered connected
 	 */
 	protected boolean canPipeConnect(TileEntity with, ForgeDirection side)
@@ -840,7 +844,9 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 	protected void computeConnections()
 	{
 		for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS)
+		{
 			this.computeConnection(side);
+		}
 	}
 
 	protected void computeConnection(ForgeDirection side)
@@ -1057,16 +1063,13 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 				break;
 
 			case 1:
-			{
 				if (this.renderState.needsRenderUpdate())
 				{
 					this.worldObj.markBlockRangeForRenderUpdate(this.xCoord, this.yCoord, this.zCoord, this.xCoord, this.yCoord, this.zCoord);
 					this.renderState.clean();
 				}
 				break;
-			}
 			case 2:
-			{
 				PipePluggable[] newPluggables = this.pluggableState.getPluggables();
 
 				// mark for render update if necessary
@@ -1109,7 +1112,6 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 
 				this.syncGateExpansions();
 				break;
-			}
 		}
 	}
 
@@ -1124,6 +1126,7 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 			GatePluggable gatePluggable = (GatePluggable) this.sideProperties.pluggables[i];
 			if (gatePluggable.getExpansions().length > 0)
 				for (IGateExpansion expansion : gatePluggable.getExpansions())
+				{
 					if (expansion != null)
 					{
 						if (!gate.expansions.containsKey(expansion))
@@ -1131,6 +1134,7 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 					}
 					else
 						this.resyncGateExpansions = true;
+				}
 		}
 	}
 
@@ -1154,8 +1158,7 @@ public class TileGenericPipe extends TileEntity implements IFluidHandler, IPipeT
 			return true;
 
 		if (BlockGenericPipe.isValid(this.pipe) && this.pipe instanceof ISolidSideTile)
-			if (((ISolidSideTile) this.pipe).isSolidOnSide(side))
-				return true;
+			return ((ISolidSideTile) this.pipe).isSolidOnSide(side);
 		return false;
 	}
 

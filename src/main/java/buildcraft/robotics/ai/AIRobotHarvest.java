@@ -1,8 +1,5 @@
 package buildcraft.robotics.ai;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.core.BuildCraftAPI;
 import buildcraft.api.crops.CropManager;
@@ -13,6 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AIRobotHarvest extends AIRobot
 {
@@ -66,7 +66,9 @@ public class AIRobotHarvest extends AIRobot
 				return;
 			}
 			for (ItemStack stack : drops)
+			{
 				BlockUtils.dropItem((WorldServer) this.robot.worldObj, MathHelper.floor_double(this.robot.posX), MathHelper.floor_double(this.robot.posY), MathHelper.floor_double(this.robot.posZ), 6000, stack);
+			}
 		}
 	}
 

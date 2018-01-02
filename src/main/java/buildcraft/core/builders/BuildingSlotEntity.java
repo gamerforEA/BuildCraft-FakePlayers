@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,21 +8,16 @@
  */
 package buildcraft.core.builders;
 
-import java.util.Collections;
-import java.util.LinkedList;
-
-import com.gamerforea.buildcraft.ModUtils;
-
-import buildcraft.api.blueprints.IBuilderContext;
-import buildcraft.api.blueprints.MappingNotFoundException;
-import buildcraft.api.blueprints.MappingRegistry;
-import buildcraft.api.blueprints.SchematicEntity;
-import buildcraft.api.blueprints.SchematicFactory;
+import buildcraft.api.blueprints.*;
 import buildcraft.api.core.Position;
+import com.gamerforea.buildcraft.ModUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class BuildingSlotEntity extends BuildingSlot
 {

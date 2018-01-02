@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,23 +8,18 @@
  */
 package buildcraft.core;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.api.tools.IToolWrench;
 import buildcraft.core.lib.items.ItemBuildCraft;
 import buildcraft.core.lib.utils.BlockUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockBed;
-import net.minecraft.block.BlockButton;
-import net.minecraft.block.BlockChest;
-import net.minecraft.block.BlockLever;
+import com.gamerforea.eventhelper.util.EventUtils;
+import net.minecraft.block.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ItemWrench extends ItemBuildCraft implements IToolWrench
 {
@@ -33,7 +28,6 @@ public class ItemWrench extends ItemBuildCraft implements IToolWrench
 
 	public ItemWrench()
 	{
-		super();
 
 		this.setFull3D();
 		this.setMaxStackSize(1);
@@ -47,8 +41,10 @@ public class ItemWrench extends ItemBuildCraft implements IToolWrench
 	private boolean isClass(Set<Class<? extends Block>> set, Class<? extends Block> cls)
 	{
 		for (Class<? extends Block> shift : set)
+		{
 			if (shift.isAssignableFrom(cls))
 				return true;
+		}
 		return false;
 	}
 
@@ -84,11 +80,7 @@ public class ItemWrench extends ItemBuildCraft implements IToolWrench
 	public boolean canWrench(EntityPlayer player, int x, int y, int z)
 	{
 		// TODO gamerforEA code start
-		if (EventUtils.cantBreak(player, x, y, z))
-			return false;
-		// TODO gamerforEA code end
-
-		return true;
+		return !EventUtils.cantBreak(player, x, y, z);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,10 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.robotics;
-
-import java.util.List;
-
-import com.gamerforea.buildcraft.ModUtils;
 
 import buildcraft.BuildCraftRobotics;
 import buildcraft.api.boards.RedstoneBoardNBT;
@@ -26,6 +22,7 @@ import buildcraft.core.lib.utils.StringUtils;
 import buildcraft.transport.BlockGenericPipe;
 import buildcraft.transport.Pipe;
 import cofh.api.energy.IEnergyContainerItem;
+import com.gamerforea.buildcraft.ModUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -39,6 +36,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.List;
 
 public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 {
@@ -155,12 +154,14 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 		itemList.add(createRobotStack(RedstoneBoardRegistry.instance.getEmptyRobotBoard(), 0));
 
 		for (RedstoneBoardNBT boardNBT : RedstoneBoardRegistry.instance.getAllBoardNBTs())
+		{
 			if (boardNBT instanceof RedstoneBoardRobotNBT)
 			{
 				RedstoneBoardRobotNBT robotNBT = (RedstoneBoardRobotNBT) boardNBT;
 				itemList.add(createRobotStack(robotNBT, 0));
 				itemList.add(createRobotStack(robotNBT, EntityRobotBase.MAX_ENERGY));
 			}
+		}
 	}
 
 	@Override

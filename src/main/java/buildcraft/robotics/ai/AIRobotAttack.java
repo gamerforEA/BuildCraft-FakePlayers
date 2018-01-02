@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -40,8 +40,8 @@ public class AIRobotAttack extends AIRobot
 			// go to the expected location.
 			if (this.target != null && this.robot.getDistanceToEntity(this.target) <= 2.0)
 			{
-			this.abortDelegateAI();
-			this.robot.setItemActive(true);
+				this.abortDelegateAI();
+				this.robot.setItemActive(true);
 			}
 	}
 

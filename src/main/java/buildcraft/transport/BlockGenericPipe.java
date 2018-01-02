@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,14 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.transport;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
 
 import buildcraft.BuildCraftTransport;
 import buildcraft.api.blocks.IColorRemovable;
@@ -64,6 +56,8 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.world.BlockEvent;
 
+import java.util.*;
+
 public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 {
 
@@ -76,8 +70,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 	public enum Part
 	{
-		Pipe,
-		Pluggable
+		Pipe, Pluggable
 	}
 
 	public static class RaytraceResult
@@ -277,11 +270,9 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 					break;
 				}
 				case Pipe:
-				{
 					float scale = 0.08F;
 					box = box.expand(scale, scale, scale);
 					break;
-				}
 			}
 			return box.getOffsetBoundingBox(x, y, z);
 		}
@@ -338,6 +329,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 		// pipe
 
 		for (ForgeDirection side : DIR_VALUES)
+		{
 			if (side == ForgeDirection.UNKNOWN || tileG.isPipeConnected(side))
 			{
 				AxisAlignedBB bb = this.getPipeBoundingBox(side);
@@ -346,10 +338,12 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 				hits[side.ordinal()] = super.collisionRayTrace(world, x, y, z, origin, direction);
 				sideHit[side.ordinal()] = side;
 			}
+		}
 
 		// pluggables
 
 		for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS)
+		{
 			if (tileG.getPipePluggable(side) != null)
 			{
 				AxisAlignedBB bb = tileG.getPipePluggable(side).getBoundingBox(side);
@@ -358,6 +352,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 				hits[7 + side.ordinal()] = super.collisionRayTrace(world, x, y, z, origin, direction);
 				sideHit[7 + side.ordinal()] = side;
 			}
+		}
 
 		// TODO: check wires
 
@@ -512,7 +507,9 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 			{
 				pipe.dropContents();
 				for (ItemStack is : pipe.computeItemDrop())
+				{
 					this.dropBlockAsItem(world, i, j, k, is);
+				}
 				this.dropBlockAsItem(world, i, j, k, new ItemStack(k1, 1, pipe.container.getItemMetadata()));
 			}
 		}
@@ -545,13 +542,11 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 			switch (rayTraceResult.hitPart)
 			{
 				case Pluggable:
-				{
 					Pipe<?> pipe = getPipe(world, x, y, z);
 					PipePluggable pluggable = pipe.container.getPipePluggable(rayTraceResult.sideHit);
 					ItemStack[] drops = pluggable.getDropItems(pipe.container);
 					if (drops != null && drops.length > 0)
 						return drops[0];
-				}
 				case Pipe:
 					return new ItemStack(getPipe(world, x, y, z).item, 1, getPipe(world, x, y, z).container.getItemMetadata());
 			}
@@ -592,11 +587,13 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (tile instanceof TileGenericPipe)
 			for (ForgeDirection d : ForgeDirection.VALID_DIRECTIONS)
+			{
 				if (d.offsetX == ox && d.offsetY == oy && d.offsetZ == oz)
 				{
 					((TileGenericPipe) tile).scheduleNeighborChange(d);
 					return;
 				}
+			}
 	}
 
 	private int getRedstoneInputToPipe(World world, int x, int y, int z, ForgeDirection d)
@@ -847,8 +844,10 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 			// Try to strip wires second, starting with yellow.
 			for (PipeWire color : PipeWire.values())
+			{
 				if (this.stripWire(pipe, color, player))
 					return true;
+			}
 		}
 
 		return false;
@@ -1030,12 +1029,9 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 	 * the particles. Useful when you have entirely different texture sheets for
 	 * different sides/locations in the world.
 	 *
-	 * @param worldObj
-	 *            The current world
-	 * @param target
-	 *            The target the player is looking at {x/y/z/side/sub}
-	 * @param effectRenderer
-	 *            A reference to the current effect renderer.
+	 * @param worldObj       The current world
+	 * @param target         The target the player is looking at {x/y/z/side/sub}
+	 * @param effectRenderer A reference to the current effect renderer.
 	 * @return True to prevent vanilla digging particles form spawning.
 	 */
 	@SideOnly(Side.CLIENT)
@@ -1090,18 +1086,12 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 	 * your block. So be sure to do proper sanity checks before assuming that
 	 * the location is this block.
 	 *
-	 * @param worldObj
-	 *            The current world
-	 * @param x
-	 *            X position to spawn the particle
-	 * @param y
-	 *            Y position to spawn the particle
-	 * @param z
-	 *            Z position to spawn the particle
-	 * @param meta
-	 *            The metadata for the block before it was destroyed.
-	 * @param effectRenderer
-	 *            A reference to the current effect renderer.
+	 * @param worldObj       The current world
+	 * @param x              X position to spawn the particle
+	 * @param y              Y position to spawn the particle
+	 * @param z              Z position to spawn the particle
+	 * @param meta           The metadata for the block before it was destroyed.
+	 * @param effectRenderer A reference to the current effect renderer.
 	 * @return True to prevent vanilla break particles from spawning.
 	 */
 	@SideOnly(Side.CLIENT)
@@ -1116,7 +1106,9 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		byte its = 4;
 		for (int i = 0; i < its; ++i)
+		{
 			for (int j = 0; j < its; ++j)
+			{
 				for (int k = 0; k < its; ++k)
 				{
 					double px = x + (i + 0.5D) / its;
@@ -1127,6 +1119,8 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 					fx.setParticleIcon(icon);
 					effectRenderer.addEffect(fx.applyColourMultiplier(x, y, z));
 				}
+			}
+		}
 		return true;
 	}
 

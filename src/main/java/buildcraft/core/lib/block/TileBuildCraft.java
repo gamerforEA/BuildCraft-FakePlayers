@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,12 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.core.lib.block;
-
-import java.util.HashSet;
-
-import com.gamerforea.buildcraft.ModUtils;
-import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.api.core.ISerializable;
@@ -24,6 +18,9 @@ import buildcraft.core.lib.network.Packet;
 import buildcraft.core.lib.network.PacketTileUpdate;
 import buildcraft.core.lib.utils.Utils;
 import cofh.api.energy.IEnergyHandler;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
@@ -32,6 +29,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.HashSet;
 
 /**
  * For future maintainers: This class intentionally does not implement just

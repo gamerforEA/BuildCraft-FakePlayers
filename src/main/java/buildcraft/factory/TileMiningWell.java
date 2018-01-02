@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -36,7 +36,6 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 
 	public TileMiningWell()
 	{
-		super();
 		this.setBattery(new RFBattery(2 * 64 * BuilderAPI.BREAK_ENERGY, BuilderAPI.BREAK_ENERGY * 4 + BuilderAPI.BUILD_ENERGY, 0));
 	}
 
@@ -78,7 +77,9 @@ public class TileMiningWell extends TileBuildCraft implements IHasWork, IPipeCon
 			int depth = this.yCoord - 1;
 
 			while (world.getBlock(this.xCoord, depth, this.zCoord) == BuildCraftFactory.plainPipeBlock)
+			{
 				depth = depth - 1;
+			}
 
 			if (depth < 1 || depth < this.yCoord - BuildCraftFactory.miningDepth || !BlockUtils.canChangeBlock(world, this.xCoord, depth, this.zCoord))
 			{

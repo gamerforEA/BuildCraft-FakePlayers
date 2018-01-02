@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -8,33 +8,20 @@
  */
 package buildcraft.core.blueprints;
 
-import java.util.BitSet;
-
-import org.apache.logging.log4j.Level;
-
-import com.gamerforea.buildcraft.ModUtils;
-import com.gamerforea.eventhelper.util.EventUtils;
-
 import buildcraft.BuildCraftCore;
-import buildcraft.api.blueprints.BuilderAPI;
-import buildcraft.api.blueprints.IBuilderContext;
-import buildcraft.api.blueprints.MappingNotFoundException;
-import buildcraft.api.blueprints.SchematicBlock;
-import buildcraft.api.blueprints.SchematicBlockBase;
+import buildcraft.api.blueprints.*;
 import buildcraft.api.core.BCLog;
 import buildcraft.api.core.BlockIndex;
 import buildcraft.api.core.IAreaProvider;
 import buildcraft.api.core.Position;
 import buildcraft.core.Box;
-import buildcraft.core.builders.BuildingItem;
-import buildcraft.core.builders.BuildingSlot;
-import buildcraft.core.builders.BuildingSlotBlock;
-import buildcraft.core.builders.IBuildingItemsProvider;
-import buildcraft.core.builders.TileAbstractBuilder;
+import buildcraft.core.builders.*;
 import buildcraft.core.lib.block.TileBuildCraft;
 import buildcraft.core.lib.utils.BitSetUtils;
 import buildcraft.core.lib.utils.BlockUtils;
 import buildcraft.core.proxy.CoreProxy;
+import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -49,6 +36,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.world.BlockEvent;
+import org.apache.logging.log4j.Level;
+
+import java.util.BitSet;
 
 public abstract class BptBuilderBase implements IAreaProvider
 {
@@ -244,7 +234,9 @@ public abstract class BptBuilderBase implements IAreaProvider
 		int hardness = (int) Math.ceil((double) this.getBlockBreakEnergy(slot) / BuilderAPI.BREAK_ENERGY);
 
 		for (int i = 0; i < hardness; ++i)
+		{
 			slot.addStackConsumed(new ItemStack(BuildCraftCore.buildToolBlock));
+		}
 	}
 
 	public void useRequirements(IInventory inv, BuildingSlot slot)

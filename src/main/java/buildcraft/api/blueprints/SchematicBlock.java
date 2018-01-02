@@ -1,18 +1,12 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p>
  * The BuildCraft API is distributed under the terms of the MIT License.
  * Please check the contents of the license, which should be located
  * as "LICENSE.API" in the BuildCraft source code distribution.
  */
 package buildcraft.api.blueprints;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 import buildcraft.api.core.BlockIndex;
 import net.minecraft.block.Block;
@@ -26,9 +20,11 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.BlockFluidBase;
 
+import java.util.*;
+
 public class SchematicBlock extends SchematicBlockBase
 {
-	public static final BlockIndex[] RELATIVE_INDEXES = new BlockIndex[] { new BlockIndex(0, -1, 0), new BlockIndex(0, 1, 0), new BlockIndex(0, 0, -1), new BlockIndex(0, 0, 1), new BlockIndex(-1, 0, 0), new BlockIndex(1, 0, 0), };
+	public static final BlockIndex[] RELATIVE_INDEXES = { new BlockIndex(0, -1, 0), new BlockIndex(0, 1, 0), new BlockIndex(0, 0, -1), new BlockIndex(0, 0, 1), new BlockIndex(-1, 0, 0), new BlockIndex(1, 0, 0), };
 
 	public Block block = null;
 	public int meta = 0;
@@ -173,6 +169,7 @@ public class SchematicBlock extends SchematicBlockBase
 
 			ArrayList<ItemStack> rqs = new ArrayList<ItemStack>();
 			for (int i = 0; i < rq.tagCount(); ++i)
+			{
 				try
 				{
 					NBTTagCompound sub = rq.getCompoundTagAt(i);
@@ -193,6 +190,7 @@ public class SchematicBlock extends SchematicBlockBase
 					t.printStackTrace();
 					this.defaultPermission = BuildingPermission.CREATIVE_ONLY;
 				}
+			}
 
 			this.storedRequirements = rqs.toArray(new ItemStack[rqs.size()]);
 		}

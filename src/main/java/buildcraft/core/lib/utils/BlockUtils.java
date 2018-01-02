@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
  * <p/>
  * BuildCraft is distributed under the terms of the Minecraft Mod Public
@@ -7,9 +7,6 @@
  * http://www.mod-buildcraft.com/MMPL-1.0.txt
  */
 package buildcraft.core.lib.utils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.BuilderAPI;
@@ -34,11 +31,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidContainerRegistry;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fluids.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class BlockUtils
 {
@@ -63,8 +59,10 @@ public final class BlockUtils
 
 		ArrayList<ItemStack> returnList = new ArrayList<ItemStack>();
 		for (ItemStack s : dropsList)
+		{
 			if (world.rand.nextFloat() <= dropChance)
 				returnList.add(s);
+		}
 
 		return returnList;
 	}
@@ -81,7 +79,9 @@ public final class BlockUtils
 		if (breakBlock(world, x, y, z, items))
 		{
 			for (ItemStack item : items)
+			{
 				dropItem(world, x, y, z, forcedLifespan, item);
+			}
 			return true;
 		}
 		return false;
@@ -192,8 +192,7 @@ public final class BlockUtils
 		else if (block instanceof IFluidBlock && ((IFluidBlock) block).getFluid() != null)
 		{
 			Fluid f = ((IFluidBlock) block).getFluid();
-			if (f.getDensity(world, x, y, z) >= 3000)
-				return false;
+			return f.getDensity(world, x, y, z) < 3000;
 		}
 
 		return true;

@@ -1,23 +1,22 @@
 /**
- * Copyright (c) 2011-2015, SpaceToad and the BuildCraft Team
+ * Copyright (c) 2011-2017, SpaceToad and the BuildCraft Team
  * http://www.mod-buildcraft.com
- *
+ * <p>
  * The BuildCraft API is distributed under the terms of the MIT License.
  * Please check the contents of the license, which should be located
  * as "LICENSE.API" in the BuildCraft source code distribution.
  */
 package buildcraft.api.blueprints;
 
-import java.util.LinkedList;
-
-import com.gamerforea.buildcraft.ModUtils;
-
 import buildcraft.api.core.BuildCraftAPI;
+import com.gamerforea.buildcraft.ModUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import java.util.LinkedList;
 
 public class SchematicMask extends SchematicBlockBase
 {
@@ -63,7 +62,9 @@ public class SchematicMask extends SchematicBlockBase
 				// Find nearest solid surface to place on
 				ForgeDirection dir = ForgeDirection.DOWN;
 				while (dir != ForgeDirection.UNKNOWN && BuildCraftAPI.isSoftBlock(context.world(), x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
+				{
 					dir = ForgeDirection.getOrientation(dir.ordinal() + 1);
+				}
 
 				stack.tryPlaceItemIntoWorld(player, context.world(), x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, dir.getOpposite().ordinal(), 0.0f, 0.0f, 0.0f);
 			}

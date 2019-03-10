@@ -57,7 +57,7 @@ public final class BlockUtils
 		ArrayList<ItemStack> dropsList = block.getDrops(world, i, j, k, meta, 0);
 		float dropChance = ForgeEventFactory.fireBlockHarvesting(dropsList, world, block, i, j, k, meta, 0, 1.0F, false, CoreProxy.proxy.getBuildCraftPlayer(world).get());
 
-		ArrayList<ItemStack> returnList = new ArrayList<ItemStack>();
+		ArrayList<ItemStack> returnList = new ArrayList<>();
 		for (ItemStack s : dropsList)
 		{
 			if (world.rand.nextFloat() <= dropChance)
@@ -74,7 +74,7 @@ public final class BlockUtils
 
 	public static boolean breakBlock(WorldServer world, int x, int y, int z, int forcedLifespan)
 	{
-		List<ItemStack> items = new ArrayList<ItemStack>();
+		List<ItemStack> items = new ArrayList<>();
 
 		if (breakBlock(world, x, y, z, items))
 		{
@@ -272,7 +272,7 @@ public final class BlockUtils
 		{
 			Fluid fluid = getFluid(block);
 
-			if (fluid != null && FluidRegistry.isFluidRegistered(fluid))
+			if (FluidRegistry.isFluidRegistered(fluid))
 			{
 				int meta = world.getBlockMetadata(x, y, z);
 				if (meta != 0)

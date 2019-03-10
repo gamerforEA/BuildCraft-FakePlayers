@@ -58,7 +58,7 @@ public class AIRobotHarvest extends AIRobot
 			}
 			// TODO gamerforEA code end
 
-			List<ItemStack> drops = new ArrayList<ItemStack>();
+			List<ItemStack> drops = new ArrayList<>();
 			if (!CropManager.harvestCrop(this.robot.worldObj, this.blockFound.x, this.blockFound.y, this.blockFound.z, drops))
 			{
 				this.setSuccess(false);

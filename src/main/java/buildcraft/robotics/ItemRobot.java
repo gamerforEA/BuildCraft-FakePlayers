@@ -22,7 +22,6 @@ import buildcraft.core.lib.utils.StringUtils;
 import buildcraft.transport.BlockGenericPipe;
 import buildcraft.transport.Pipe;
 import cofh.api.energy.IEnergyContainerItem;
-import com.gamerforea.buildcraft.ModUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -37,6 +36,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
@@ -62,12 +62,12 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 	// TODO gamerforEA code start
 	public EntityRobot createRobot(ItemStack stack, World world)
 	{
-		return this.createRobot(ModUtils.getModFake(world), stack, world);
+		return this.createRobot(null, stack, world);
 	}
 	// TODO gamerforEA code end
 
 	// TODO gamerforEA add EntityPlayer parameter
-	public EntityRobot createRobot(EntityPlayer player, ItemStack stack, World world)
+	public EntityRobot createRobot(@Nullable EntityPlayer player, ItemStack stack, World world)
 	{
 		try
 		{
@@ -79,7 +79,7 @@ public class ItemRobot extends ItemBuildCraft implements IEnergyContainerItem
 			EntityRobot robot = new EntityRobot(world, robotNBT);
 
 			// TODO gamerforEA code start
-			robot.fake.setProfile(player.getGameProfile());
+			robot.fake.setProfile(player);
 			// TODO gamerforEA code end
 
 			robot.getBattery().setEnergy(getEnergy(nbt));

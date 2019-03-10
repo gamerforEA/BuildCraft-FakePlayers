@@ -27,9 +27,9 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 {
 	public static final int[] REBUILD_DELAY = new int[8];
 	public static final int MAX_LIQUID = FluidContainerRegistry.BUCKET_VOLUME * 2;
-	private final TreeMap<Integer, Deque<BlockIndex>> pumpLayerQueues = new TreeMap<Integer, Deque<BlockIndex>>();
-	private final Set<BlockIndex> visitedBlocks = new HashSet<BlockIndex>();
-	private Deque<BlockIndex> fluidsFound = new LinkedList<BlockIndex>();
+	private final TreeMap<Integer, Deque<BlockIndex>> pumpLayerQueues = new TreeMap<>();
+	private final Set<BlockIndex> visitedBlocks = new HashSet<>();
+	private Deque<BlockIndex> fluidsFound = new LinkedList<>();
 	private final Tank tank = new Tank("tank", MAX_LIQUID, this);
 	private int rebuildDelay;
 	private int tick = Utils.RANDOM.nextInt();
@@ -144,8 +144,7 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 				this.pumpLayerQueues.pollFirstEntry();
 			if (remove)
 			{
-				BlockIndex index = bottomLayer.pollFirst();
-				return index;
+				return bottomLayer.pollFirst();
 			}
 			return bottomLayer.peekFirst();
 		}
@@ -155,13 +154,7 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 
 	private Deque<BlockIndex> getLayerQueue(int layer)
 	{
-		Deque<BlockIndex> pumpQueue = this.pumpLayerQueues.get(layer);
-		if (pumpQueue == null)
-		{
-			pumpQueue = new LinkedList<BlockIndex>();
-			this.pumpLayerQueues.put(layer, pumpQueue);
-		}
-		return pumpQueue;
+		return this.pumpLayerQueues.computeIfAbsent(layer, k -> new LinkedList<>());
 	}
 
 	/**
@@ -185,7 +178,7 @@ public class TileFloodGate extends TileBuildCraft implements IFluidHandler
 		while (!this.fluidsFound.isEmpty())
 		{
 			Deque<BlockIndex> fluidsToExpand = this.fluidsFound;
-			this.fluidsFound = new LinkedList<BlockIndex>();
+			this.fluidsFound = new LinkedList<>();
 
 			for (BlockIndex index : fluidsToExpand)
 			{

@@ -68,7 +68,11 @@ public class TileQuarry extends TileAbstractBuilder
 {
 	private enum Stage
 	{
-		BUILDING, DIGGING, MOVING, IDLE, DONE
+		BUILDING,
+		DIGGING,
+		MOVING,
+		IDLE,
+		DONE
 	}
 
 	public EntityMechanicalArm arm;

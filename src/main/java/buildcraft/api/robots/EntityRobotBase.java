@@ -13,7 +13,6 @@ import buildcraft.api.core.IZone;
 import cofh.api.energy.IEnergyStorage;
 import com.gamerforea.buildcraft.ModUtils;
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.inventory.IInventory;
@@ -31,7 +30,7 @@ public abstract class EntityRobotBase extends EntityLiving implements IInventory
 	public static final long NULL_ROBOT_ID = Long.MAX_VALUE;
 
 	// TODO gamerforEA code start
-	public FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
 
 	@Override
 	public void writeEntityToNBT(NBTTagCompound nbt)

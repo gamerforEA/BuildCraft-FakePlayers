@@ -113,7 +113,7 @@ public class SchematicBlock extends SchematicBlockBase
 	 */
 	public Set<BlockIndex> getPrerequisiteBlocks(IBuilderContext context)
 	{
-		Set<BlockIndex> indexes = new HashSet<BlockIndex>();
+		Set<BlockIndex> indexes = new HashSet<>();
 		if (this.block instanceof BlockFalling)
 			indexes.add(RELATIVE_INDEXES[ForgeDirection.DOWN.ordinal()]);
 		return indexes;
@@ -167,7 +167,7 @@ public class SchematicBlock extends SchematicBlockBase
 		{
 			NBTTagList rq = nbt.getTagList("rq", Constants.NBT.TAG_COMPOUND);
 
-			ArrayList<ItemStack> rqs = new ArrayList<ItemStack>();
+			ArrayList<ItemStack> rqs = new ArrayList<>();
 			for (int i = 0; i < rq.tagCount(); ++i)
 			{
 				try
@@ -192,7 +192,7 @@ public class SchematicBlock extends SchematicBlockBase
 				}
 			}
 
-			this.storedRequirements = rqs.toArray(new ItemStack[rqs.size()]);
+			this.storedRequirements = rqs.toArray(new ItemStack[0]);
 		}
 		else
 			this.storedRequirements = new ItemStack[0];

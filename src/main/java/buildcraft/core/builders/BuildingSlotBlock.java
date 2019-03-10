@@ -38,7 +38,8 @@ public class BuildingSlotBlock extends BuildingSlot
 
 	public enum Mode
 	{
-		ClearIfInvalid, Build
+		ClearIfInvalid,
+		Build
 	}
 
 	public Mode mode = Mode.Build;
@@ -50,8 +51,7 @@ public class BuildingSlotBlock extends BuildingSlot
 	{
 		if (this.schematic == null)
 			return new SchematicMask(false);
-		else
-			return this.schematic;
+		return this.schematic;
 	}
 
 	// TODO gamerforEA code start
@@ -170,15 +170,12 @@ public class BuildingSlotBlock extends BuildingSlot
 	public LinkedList<ItemStack> getRequirements(IBuilderContext context)
 	{
 		if (this.mode == Mode.ClearIfInvalid)
-			return new LinkedList<ItemStack>();
-		else
-		{
-			LinkedList<ItemStack> req = new LinkedList<ItemStack>();
+			return new LinkedList<>();
+		LinkedList<ItemStack> req = new LinkedList<>();
 
-			this.getSchematic().getRequirementsForPlacement(context, req);
+		this.getSchematic().getRequirementsForPlacement(context, req);
 
-			return req;
-		}
+		return req;
 	}
 
 	@Override
@@ -239,7 +236,7 @@ public class BuildingSlotBlock extends BuildingSlot
 		if (nbt.hasKey("schematic"))
 			this.schematic = (SchematicBlockBase) SchematicFactory.createSchematicFromWorldNBT(nbt.getCompoundTag("schematic"), registry);
 
-		this.stackConsumed = new LinkedList<ItemStack>();
+		this.stackConsumed = new LinkedList<>();
 
 		NBTTagList nbtStacks = nbt.getTagList("stackConsumed", Constants.NBT.TAG_COMPOUND);
 
@@ -255,8 +252,7 @@ public class BuildingSlotBlock extends BuildingSlot
 	{
 		if (this.mode == Mode.ClearIfInvalid)
 			return this.stackConsumed;
-		else
-			return this.getSchematic().getStacksToDisplay(this.stackConsumed);
+		return this.getSchematic().getStacksToDisplay(this.stackConsumed);
 	}
 
 	@Override
@@ -270,8 +266,7 @@ public class BuildingSlotBlock extends BuildingSlot
 	{
 		if (this.schematic == null)
 			return 1;
-		else
-			return this.schematic.buildTime();
+		return this.schematic.buildTime();
 	}
 
 }

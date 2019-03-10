@@ -10,6 +10,7 @@ package buildcraft.api.blueprints;
 
 import buildcraft.api.core.JavaTools;
 import com.gamerforea.buildcraft.EventConfig;
+import com.gamerforea.buildcraft.ModUtils;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -70,51 +71,57 @@ public class SchematicTile extends SchematicBlock
 			this.tileNBT.setInteger("y", y);
 			this.tileNBT.setInteger("z", z);
 
-			// TODO gamerforEA code start
+			// TODO gamerforEA code replace, old code:
+			// context.world().setTileEntity(x, y, z, TileEntity.createAndLoadEntity(this.tileNBT));
 			if (EventConfig.builderNbtDisable)
 				return;
 
 			NBTTagCompound originalNbt = (NBTTagCompound) this.tileNBT.copy();
-
-			Logger log = LogManager.getLogger("BuildCraftEvents");
-			if (EventConfig.builderNbtDebug)
-				log.info("Process {}. NBT: {}", originalNbt.getString("id"), originalNbt);
-
-			for (String key : EventConfig.builderNbtTagBlackList)
+			try
 			{
-				NBTTagCompound nbt = this.tileNBT;
-				String[] parts = key.split("/");
-				String tag = parts[0];
+				Logger log = LogManager.getLogger("BuildCraftEvents");
+				if (EventConfig.builderNbtDebug)
+					log.info("Process {}. NBT: {}", originalNbt.getString("id"), originalNbt);
 
-				if (parts.length > 1)
+				for (String key : EventConfig.builderNbtTagBlackList)
 				{
-					tag = parts[parts.length - 1];
-					for (int i = 0; i < parts.length - 1; i++)
+					NBTTagCompound nbt = this.tileNBT;
+					String[] parts = key.split("/");
+					String tag = parts[0];
+
+					if (parts.length > 1)
 					{
-						if (nbt.hasKey(parts[i], Constants.NBT.TAG_COMPOUND))
-							nbt = nbt.getCompoundTag(parts[i]);
-						else
+						tag = parts[parts.length - 1];
+						for (int i = 0; i < parts.length - 1; i++)
 						{
-							nbt = null;
-							break;
+							if (nbt.hasKey(parts[i], Constants.NBT.TAG_COMPOUND))
+								nbt = nbt.getCompoundTag(parts[i]);
+							else
+							{
+								nbt = null;
+								break;
+							}
 						}
+					}
+
+					if (nbt != null)
+					{
+						boolean has = EventConfig.builderNbtDebug && nbt.hasKey(tag);
+						nbt.removeTag(tag);
+						if (has)
+							log.info("Tag \"{}\" removed", key);
 					}
 				}
 
-				if (nbt != null)
-				{
-					boolean has = EventConfig.builderNbtDebug && nbt.hasKey(tag);
-					nbt.removeTag(tag);
-					if (has)
-						log.info("Tag \"{}\" removed", key);
-				}
+				if (EventConfig.builderRemoveItems)
+					ModUtils.removeItems(this.tileNBT);
+
+				context.world().setTileEntity(x, y, z, TileEntity.createAndLoadEntity(this.tileNBT));
 			}
-			// TODO gamerforEA code end
-
-			context.world().setTileEntity(x, y, z, TileEntity.createAndLoadEntity(this.tileNBT));
-
-			// TODO gamerforEA code start
-			this.tileNBT = originalNbt;
+			finally
+			{
+				this.tileNBT = originalNbt;
+			}
 			// TODO gamerforEA code end
 		}
 	}
@@ -149,7 +156,7 @@ public class SchematicTile extends SchematicBlock
 			{
 				IInventory inv = (IInventory) tile;
 
-				ArrayList<ItemStack> rqs = new ArrayList<ItemStack>();
+				ArrayList<ItemStack> rqs = new ArrayList<>();
 
 				for (int i = 0; i < inv.getSizeInventory(); ++i)
 				{
@@ -157,7 +164,7 @@ public class SchematicTile extends SchematicBlock
 						rqs.add(inv.getStackInSlot(i));
 				}
 
-				this.storedRequirements = JavaTools.concat(this.storedRequirements, rqs.toArray(new ItemStack[rqs.size()]));
+				this.storedRequirements = JavaTools.concat(this.storedRequirements, rqs.toArray(new ItemStack[0]));
 			}
 		}
 	}

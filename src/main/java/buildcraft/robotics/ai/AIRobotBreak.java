@@ -122,8 +122,7 @@ public class AIRobotBreak extends AIRobot
 
 	private float getBreakSpeed(EntityRobotBase robot, ItemStack usingItem, Block block, int meta)
 	{
-		ItemStack stack = usingItem;
-		float f = stack == null ? 1.0F : stack.getItem().getDigSpeed(stack, block, meta);
+		float f = usingItem == null ? 1.0F : usingItem.getItem().getDigSpeed(usingItem, block, meta);
 
 		if (f > 1.0F)
 		{

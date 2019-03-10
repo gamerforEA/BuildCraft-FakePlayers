@@ -20,7 +20,6 @@ import buildcraft.core.lib.utils.Utils;
 import cofh.api.energy.IEnergyHandler;
 import com.gamerforea.buildcraft.ModUtils;
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
@@ -41,7 +40,7 @@ import java.util.HashSet;
 public abstract class TileBuildCraft extends TileEntity implements IEnergyHandler, ISerializable
 {
 	protected TileBuffer[] cache;
-	protected HashSet<EntityPlayer> guiWatchers = new HashSet<EntityPlayer>();
+	protected HashSet<EntityPlayer> guiWatchers = new HashSet<>();
 	protected IControllable.Mode mode;
 
 	private boolean init = false;
@@ -52,7 +51,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 	private long worldTimeEnergyReceive;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.profile, this);
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
 	// TODO gamerforEA code end
 
 	public String getOwner()
@@ -62,14 +61,12 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 
 	public void addGuiWatcher(EntityPlayer player)
 	{
-		if (!this.guiWatchers.contains(player))
-			this.guiWatchers.add(player);
+		this.guiWatchers.add(player);
 	}
 
 	public void removeGuiWatcher(EntityPlayer player)
 	{
-		if (this.guiWatchers.contains(player))
-			this.guiWatchers.remove(player);
+		this.guiWatchers.remove(player);
 	}
 
 	@Override
@@ -115,7 +112,7 @@ public abstract class TileBuildCraft extends TileEntity implements IEnergyHandle
 			this.owner = ((EntityPlayer) entity).getDisplayName();
 
 			// TODO gamerforEA code start
-			this.fake.setProfile(((EntityPlayer) entity).getGameProfile());
+			this.fake.setProfile(entity);
 			// TODO gamerforEA code end
 		}
 	}

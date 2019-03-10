@@ -105,7 +105,8 @@ public class BuildCraftCore extends BuildCraftMod
 
 	public enum RenderMode
 	{
-		Full, NoDynamic
+		Full,
+		NoDynamic
 	}
 
 	public static RootCommand commandBuildcraft = new RootCommand("buildcraft");
@@ -318,7 +319,7 @@ public class BuildCraftCore extends BuildCraftMod
 		OreDictionary.registerOre("craftingTableWood", Blocks.crafting_table);
 
 		// TODO gamerforEA code start
-		EventConfig.autoCraftBlackList.size(); // Config initialization
+		EventConfig.init();
 		// TODO gamerforEA code end
 	}
 

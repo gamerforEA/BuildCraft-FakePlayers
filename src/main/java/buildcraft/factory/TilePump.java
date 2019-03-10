@@ -25,6 +25,7 @@ import buildcraft.core.lib.fluids.TankUtils;
 import buildcraft.core.lib.utils.BlockUtils;
 import buildcraft.core.lib.utils.Utils;
 import buildcraft.core.proxy.CoreProxy;
+import com.gamerforea.buildcraft.EventConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -41,7 +42,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	public SingleUseTank tank = new SingleUseTank("tank", MAX_LIQUID, this);
 
 	private EntityBlock tube;
-	private TreeMap<Integer, Deque<BlockIndex>> pumpLayerQueues = new TreeMap<Integer, Deque<BlockIndex>>();
+	private TreeMap<Integer, Deque<BlockIndex>> pumpLayerQueues = new TreeMap<>();
 	private double tubeY = Double.NaN;
 	private int aimY = 0;
 
@@ -101,8 +102,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 			return;
 
 		BlockIndex index = this.getNextIndexToPump(false);
-
-		FluidStack fluidToPump = index != null ? BlockUtils.drainBlock(this.worldObj, index.x, index.y, index.z, false) : null;
+		FluidStack fluidToPump = index == null ? null : BlockUtils.drainBlock(this.worldObj, index.x, index.y, index.z, false);
 		if (fluidToPump != null)
 		{
 			if (this.isFluidAllowed(fluidToPump.getFluid()) && this.tank.fill(fluidToPump, false) == fluidToPump.amount)
@@ -123,22 +123,33 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 					this.tickPumped = this.tick;
 				}
 		}
-		else if (this.tick % 128 == 0)
+		else
 		{
-			// TODO: improve that decision
-			this.rebuildQueue();
+			// TODO gamerforEA code start
+			if (EventConfig.pumpFullQueueCheck && index != null)
+			{
+				this.getNextIndexToPump(true);
+				return;
+			}
+			// TODO gamerforEA code end
 
-			if (this.getNextIndexToPump(false) == null)
-				for (int y = this.yCoord - 1; y > 0; --y)
-				{
-					if (this.isPumpableFluid(this.xCoord, y, this.zCoord))
+			if (this.tick % 128 == 0)
+			{
+				// TODO: improve that decision
+				this.rebuildQueue();
+
+				if (this.getNextIndexToPump(false) == null)
+					for (int y = this.yCoord - 1; y > 0; --y)
 					{
-						this.aimY = y;
-						return;
+						if (this.isPumpableFluid(this.xCoord, y, this.zCoord))
+						{
+							this.aimY = y;
+							return;
+						}
+						if (this.isBlocked(this.xCoord, y, this.zCoord))
+							return;
 					}
-					else if (this.isBlocked(this.xCoord, y, this.zCoord))
-						return;
-				}
+			}
 		}
 	}
 
@@ -212,27 +223,17 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 		{
 			if (this.timer.markTimeIfDelay(this.worldObj))
 				this.rebuildQueue();
-
 			return null;
 		}
 
 		Deque<BlockIndex> topLayer = this.pumpLayerQueues.lastEntry().getValue();
-
 		if (topLayer != null)
 		{
 			if (topLayer.isEmpty())
 				this.pumpLayerQueues.pollLastEntry();
-
-			if (remove)
-			{
-				BlockIndex index = topLayer.pollLast();
-				return index;
-			}
-			else
-				return topLayer.peekLast();
+			return remove ? topLayer.pollLast() : topLayer.peekLast();
 		}
-		else
-			return null;
+		return null;
 	}
 
 	private Deque<BlockIndex> getLayerQueue(int layer)
@@ -241,7 +242,11 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 		if (pumpQueue == null)
 		{
-			pumpQueue = new LinkedList<BlockIndex>();
+			// TODO gamerforEA code replace, old code:
+			// pumpQueue = new LinkedList<BlockIndex>();
+			pumpQueue = new ArrayDeque<>();
+			// TODO gamerforEA code end
+
 			this.pumpLayerQueues.put(layer, pumpQueue);
 		}
 
@@ -263,13 +268,11 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 		if (pumpingFluid != this.tank.getAcceptedFluid() && this.tank.getAcceptedFluid() != null)
 			return;
 
-		Set<BlockIndex> visitedBlocks = new HashSet<BlockIndex>();
+		Set<BlockIndex> visitedBlocks = new HashSet<>();
+
+		/* TODO gamerforEA code replace, old code:
 		Deque<BlockIndex> fluidsFound = new LinkedList<BlockIndex>();
-
 		this.queueForPumping(x, y, z, visitedBlocks, fluidsFound, pumpingFluid);
-
-		//		long timeoutTime = System.nanoTime() + 10000;
-
 		while (!fluidsFound.isEmpty())
 		{
 			Deque<BlockIndex> fluidsToExpand = fluidsFound;
@@ -285,20 +288,52 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 				if (pumpingFluid == FluidRegistry.WATER && !BuildCraftCore.consumeWaterSources && this.numFluidBlocksFound >= 9)
 					return;
-
-				//				if (System.nanoTime() > timeoutTime)
-				//					return;
+			}
+		} */
+		boolean checkWaterNum = pumpingFluid == FluidRegistry.WATER && !BuildCraftCore.consumeWaterSources;
+		List<BlockIndex> fluidsFound = new ArrayList<>();
+		this.queueForPumping(x, y, z, visitedBlocks, fluidsFound, pumpingFluid);
+		while (!fluidsFound.isEmpty())
+		{
+			List<BlockIndex> fluidsToExpand = fluidsFound;
+			fluidsFound = new ArrayList<>();
+			for (BlockIndex index : fluidsToExpand)
+			{
+				this.queueForPumping(index.x, index.y + 1, index.z, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x + 1, index.y, index.z, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x - 1, index.y, index.z, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x, index.y, index.z + 1, visitedBlocks, fluidsFound, pumpingFluid);
+				this.queueForPumping(index.x, index.y, index.z - 1, visitedBlocks, fluidsFound, pumpingFluid);
+				if (checkWaterNum && this.numFluidBlocksFound >= 9)
+					return;
 			}
 		}
+		// TODO gamerforEA code end
 	}
 
+	// TODO gamerforEA code replace, old code:
+	// public void queueForPumping(int x, int y, int z, Set<BlockIndex> visitedBlocks, Deque<BlockIndex> fluidsFound, Fluid pumpingFluid)
 	public void queueForPumping(int x, int y, int z, Set<BlockIndex> visitedBlocks, Deque<BlockIndex> fluidsFound, Fluid pumpingFluid)
 	{
+		this.queueForPumping(x, y, z, visitedBlocks, (Collection<BlockIndex>) fluidsFound, pumpingFluid);
+	}
+
+	public void queueForPumping(int x, int y, int z, Set<BlockIndex> visitedBlocks, Collection<BlockIndex> fluidsFound, Fluid pumpingFluid)
+	// TODO gamerforEA code end
+	{
+		// TODO gamerforEA code start
+		int distanceX = x - this.xCoord;
+		int distanceZ = z - this.zCoord;
+		if (distanceX * distanceX + distanceZ * distanceZ > 64 * 64)
+			return;
+		// TODO gamerforEA code end
+
 		BlockIndex index = new BlockIndex(x, y, z);
 		if (visitedBlocks.add(index))
 		{
+			/* TODO gamerforEA code clear:
 			if ((x - this.xCoord) * (x - this.xCoord) + (z - this.zCoord) * (z - this.zCoord) > 64 * 64)
-				return;
+				return; */
 
 			Block block = BlockUtils.getBlock(this.worldObj, x, y, z);
 
@@ -319,10 +354,9 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 		if (fluid == null)
 			return false;
-		else if (!this.isFluidAllowed(fluid))
+		if (!this.isFluidAllowed(fluid))
 			return false;
-		else
-			return !(this.tank.getAcceptedFluid() != null && this.tank.getAcceptedFluid() != fluid);
+		return !(this.tank.getAcceptedFluid() != null && this.tank.getAcceptedFluid() != fluid);
 	}
 
 	private boolean canDrainBlock(Block block, int x, int y, int z, Fluid fluid)
@@ -334,8 +368,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 
 		if (fluidStack == null || fluidStack.amount <= 0)
 			return false;
-		else
-			return fluidStack.getFluid() == fluid;
+		return fluidStack.getFluid() == fluid;
 	}
 
 	private boolean isFluidAllowed(Fluid fluid)
@@ -377,11 +410,7 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	public boolean hasWork()
 	{
 		BlockIndex next = this.getNextIndexToPump(false);
-
-		if (next != null)
-			return this.isPumpableFluid(next.x, next.y, next.z);
-		else
-			return false;
+		return next != null && this.isPumpableFluid(next.x, next.y, next.z);
 	}
 
 	@Override
@@ -475,10 +504,9 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	{
 		if (resource == null)
 			return null;
-		else if (!resource.isFluidEqual(this.tank.getFluid()))
+		if (!resource.isFluidEqual(this.tank.getFluid()))
 			return null;
-		else
-			return this.drain(from, resource.amount, doDrain);
+		return this.drain(from, resource.amount, doDrain);
 	}
 
 	@Override
@@ -510,7 +538,6 @@ public class TilePump extends TileBuildCraft implements IHasWork, IFluidHandler,
 	{
 		if (led == 0)
 			return this.ledState & 15;
-		else
-			return this.ledState >> 4 > 0 ? 15 : 0;
+		return this.ledState >> 4 > 0 ? 15 : 0;
 	}
 }

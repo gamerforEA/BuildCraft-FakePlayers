@@ -61,8 +61,8 @@ import java.util.*;
 public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 {
 
-	public static Map<Item, Class<? extends Pipe<?>>> pipes = new HashMap<Item, Class<? extends Pipe<?>>>();
-	public static Map<BlockIndex, Pipe<?>> pipeRemoved = new HashMap<BlockIndex, Pipe<?>>();
+	public static Map<Item, Class<? extends Pipe<?>>> pipes = new HashMap<>();
+	public static Map<BlockIndex, Pipe<?>> pipeRemoved = new HashMap<>();
 
 	private static long lastRemovedDate = -1;
 
@@ -70,7 +70,8 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 	public enum Part
 	{
-		Pipe, Pluggable
+		Pipe,
+		Pluggable
 	}
 
 	public static class RaytraceResult
@@ -286,8 +287,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (raytraceResult == null)
 			return null;
-		else
-			return raytraceResult.movingObjectPosition;
+		return raytraceResult.movingObjectPosition;
 	}
 
 	public RaytraceResult doRayTrace(World world, int x, int y, int z, EntityPlayer player)
@@ -382,17 +382,14 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (minIndex == -1)
 			return null;
+		Part hitPart;
+
+		if (minIndex < 7)
+			hitPart = Part.Pipe;
 		else
-		{
-			Part hitPart;
+			hitPart = Part.Pluggable;
 
-			if (minIndex < 7)
-				hitPart = Part.Pipe;
-			else
-				hitPart = Part.Pluggable;
-
-			return new RaytraceResult(hitPart, hits[minIndex], boxes[minIndex], sideHit[minIndex]);
-		}
+		return new RaytraceResult(hitPart, hits[minIndex], boxes[minIndex], sideHit[minIndex]);
 	}
 
 	private void setBlockBounds(AxisAlignedBB bb)
@@ -467,7 +464,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 		if (world.isRemote)
 			return null;
 
-		ArrayList<ItemStack> list = new ArrayList<ItemStack>();
+		ArrayList<ItemStack> list = new ArrayList<>();
 		Pipe<?> pipe = getPipe(world, x, y, z);
 
 		if (pipe == null)
@@ -529,8 +526,8 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 		EntityPlayer clientPlayer = CoreProxy.proxy.getClientPlayer();
 		if (clientPlayer != null)
 			return this.getPickBlock(target, world, x, y, z, clientPlayer);
-		else
-			return new ItemStack(getPipe(world, x, y, z).item, 1, getPipe(world, x, y, z).container.getItemMetadata());
+		Pipe<?> pipe = getPipe(world, x, y, z);
+		return new ItemStack(pipe.item, 1, pipe.container.getItemMetadata());
 	}
 
 	@Override
@@ -548,7 +545,8 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 					if (drops != null && drops.length > 0)
 						return drops[0];
 				case Pipe:
-					return new ItemStack(getPipe(world, x, y, z).item, 1, getPipe(world, x, y, z).container.getItemMetadata());
+					pipe = getPipe(world, x, y, z);
+					return new ItemStack(pipe.item, 1, pipe.container.getItemMetadata());
 			}
 		return null;
 	}
@@ -637,7 +635,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 		// TODO gamerforEA code start
 		TileEntity tile;
 		if (placer instanceof EntityPlayer && (tile = world.getTileEntity(x, y, z)) instanceof TileGenericPipe)
-			((TileGenericPipe) tile).fake.setProfile(((EntityPlayer) placer).getGameProfile());
+			((TileGenericPipe) tile).fake.setProfile((EntityPlayer) placer);
 		// TODO gamerforEA code end
 	}
 
@@ -683,8 +681,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 					ForgeDirection hitSide = rayTraceResult.hitPart == Part.Pipe ? rayTraceResult.sideHit : ForgeDirection.UNKNOWN;
 					return pipe.blockActivated(player, hitSide);
 				}
-				else
-					return pipe.blockActivated(player, ForgeDirection.UNKNOWN);
+				return pipe.blockActivated(player, ForgeDirection.UNKNOWN);
 			}
 			else if (currentItem.getItem() instanceof IMapLocation)
 				// We want to be able to record pipe locations
@@ -731,16 +728,13 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 				clickedGate.openGui(player);
 				return true;
 			}
-			else
-			{
-				if (pipe.blockActivated(player, ForgeDirection.getOrientation(side)))
-					return true;
+			if (pipe.blockActivated(player, ForgeDirection.getOrientation(side)))
+				return true;
 
-				if (rayTraceResult != null)
-				{
-					ForgeDirection hitSide = rayTraceResult.hitPart == Part.Pipe ? rayTraceResult.sideHit : ForgeDirection.UNKNOWN;
-					return pipe.blockActivated(player, hitSide);
-				}
+			if (rayTraceResult != null)
+			{
+				ForgeDirection hitSide = rayTraceResult.hitPart == Part.Pipe ? rayTraceResult.sideHit : ForgeDirection.UNKNOWN;
+				return pipe.blockActivated(player, hitSide);
 			}
 		}
 
@@ -765,6 +759,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (rayTraceResult != null && rayTraceResult.hitPart == Part.Pipe)
 			if (!pipe.container.hasPipePluggable(placementSide))
+			{
 				if (pipe.container.setPluggable(placementSide, pluggable, player))
 				{
 					if (!player.capabilities.isCreativeMode)
@@ -772,8 +767,8 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 					return true;
 				}
-				else
-					return false;
+				return false;
+			}
 		return false;
 	}
 
@@ -881,8 +876,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (isValid(pipe))
 			return pipe.canConnectRedstone();
-		else
-			return false;
+		return false;
 	}
 
 	@Override
@@ -892,8 +886,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (isValid(pipe))
 			return pipe.isPoweringTo(l);
-		else
-			return 0;
+		return 0;
 	}
 
 	@Override
@@ -909,8 +902,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 
 		if (isValid(pipe))
 			return pipe.isIndirectlyPoweringTo(l);
-		else
-			return 0;
+		return 0;
 	}
 
 	@SuppressWarnings({ "all" })
@@ -950,8 +942,7 @@ public class BlockGenericPipe extends BlockBuildCraft implements IColorRemovable
 			Class<? extends Pipe> pipe = pipes.get(key);
 			if (pipe != null)
 				return pipe.getConstructor(Item.class).newInstance(key);
-			else
-				BCLog.logger.warn("Detected pipe with unknown key (" + key + "). Did you remove a buildcraft addon?");
+			BCLog.logger.warn("Detected pipe with unknown key (" + key + "). Did you remove a buildcraft addon?");
 
 		}
 		catch (Throwable t)

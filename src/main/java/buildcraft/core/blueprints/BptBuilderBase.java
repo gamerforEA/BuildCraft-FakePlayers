@@ -30,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -121,11 +122,13 @@ public abstract class BptBuilderBase implements IAreaProvider
 
 		if (slot != null)
 		{
+			Position destination = slot.getDestination();
+
 			// TODO gamerforEA code start
 			EntityPlayer player = builder instanceof TileBuildCraft ? ((TileBuildCraft) builder).fake.get() : ModUtils.getModFake(world);
-			int xCoord = (int) slot.getDestination().x;
-			int yCoord = (int) slot.getDestination().y;
-			int zCoord = (int) slot.getDestination().z;
+			int xCoord = MathHelper.floor_double(destination.x);
+			int yCoord = MathHelper.floor_double(destination.y);
+			int zCoord = MathHelper.floor_double(destination.z);
 			if (EventUtils.cantBreak(player, xCoord, yCoord, zCoord))
 				return false;
 			// TODO gamerforEA code end
@@ -133,7 +136,7 @@ public abstract class BptBuilderBase implements IAreaProvider
 			slot.built = true;
 			BuildingItem i = new BuildingItem();
 			i.origin = new Position(x, y, z);
-			i.destination = slot.getDestination();
+			i.destination = destination;
 			i.slotToBuild = slot;
 			i.context = this.getContext();
 			i.setStacksToDisplay(slot.getStacksToDisplay());

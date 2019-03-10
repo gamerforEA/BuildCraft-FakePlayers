@@ -51,6 +51,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Mod(name = "BuildCraft Builders",
@@ -201,7 +202,7 @@ public class BuildCraftBuilders extends BuildCraftMod
 			try
 			{
 				Process process = Runtime.getRuntime().exec(new String[] { "xdg-user-dir", "DOWNLOAD" });
-				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "utf-8"));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
 				process.waitFor();
 				String line = reader.readLine().trim();
 				reader.close();

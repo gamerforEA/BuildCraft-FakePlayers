@@ -1,83 +1,88 @@
 package com.gamerforea.buildcraft;
 
-import com.gamerforea.eventhelper.util.FastUtils;
+import com.gamerforea.eventhelper.config.*;
 import com.google.common.collect.Sets;
-import cpw.mods.fml.common.registry.GameData;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraftforge.common.config.Configuration;
 
 import java.util.Set;
 
+import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
+import static net.minecraftforge.common.config.Configuration.CATEGORY_SPLITTER;
+
+@Config(name = "BuildCraft")
 public final class EventConfig
 {
-	public static final Set<String> autoCraftBlackList = Sets.newHashSet("minecraft:stone", "IC2:blockMachine:5");
+	private static final String CATEGORY_BLACKLISTS = "blacklists";
+	private static final String CATEGORY_OTHER = "other";
+	private static final String CATEGORY_OTHER_BUILDER = CATEGORY_OTHER + CATEGORY_SPLITTER + "builder";
+	private static final String CATEGORY_OTHER_LASER = CATEGORY_OTHER + CATEGORY_SPLITTER + "laser";
+	private static final String CATEGORY_PERFORMANCE = "performance";
+
+	@ConfigItemBlockList(name = "autoCraft",
+						 category = CATEGORY_BLACKLISTS,
+						 comment = "Чёрный список предметов для автокрафта",
+						 oldName = "autoCraftBlackList",
+						 oldCategory = CATEGORY_GENERAL)
+	public static final ItemBlockList autoCraftBlackList = new ItemBlockList(true);
+
+	@ConfigStringCollection(name = "builderNbtTag",
+							category = CATEGORY_BLACKLISTS,
+							comment = "Чёрный список NBT тэгов для строителя",
+							oldName = "builderNbtTagBlackList",
+							oldCategory = CATEGORY_GENERAL)
 	public static final Set<String> builderNbtTagBlackList = Sets.newHashSet();
+
+	@ConfigBoolean(name = "nbtDebug",
+				   category = CATEGORY_OTHER_BUILDER,
+				   comment = "Вывод NBT тайлов для Строителя",
+				   oldName = "builderNbtDebug",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean builderNbtDebug = false;
+
+	@ConfigBoolean(name = "nbtDisable",
+				   category = CATEGORY_OTHER_BUILDER,
+				   comment = "Выключить перенос NBT тайлов для Строителя",
+				   oldName = "builderNbtDisable",
+				   oldCategory = CATEGORY_GENERAL)
 	public static boolean builderNbtDisable = false;
+
+	@ConfigBoolean(name = "removeItems",
+				   category = CATEGORY_OTHER_BUILDER,
+				   comment = "Включить удаление предметов из NBT тайлов и мобов для Строителя",
+				   oldName = "builderRemoveItems",
+				   oldCategory = CATEGORY_GENERAL)
+	public static boolean builderRemoveItems = false;
+
+	@ConfigInt(name = "maxRecievedEnergyPerTick",
+			   category = CATEGORY_OTHER_LASER,
+			   comment = "Максимальное количество энергии, принимаемое Сборочным столом в тик (0 - без ограничений)",
+			   oldName = "maxRecievedLaserEnergyPerTick",
+			   oldCategory = CATEGORY_GENERAL,
+			   min = 0)
+	public static int maxRecievedLaserEnergyPerTick = 0;
+
+	@ConfigInt(name = "maxEnergyPerTick",
+			   category = CATEGORY_OTHER_LASER,
+			   comment = "Максимальное количество энергии, передаваемое Лазером в тик",
+			   oldName = "maxLaserEnergyPerTick",
+			   oldCategory = CATEGORY_GENERAL,
+			   min = 1)
+	public static int maxLaserEnergyPerTick = 40;
+
+	@ConfigBoolean(category = CATEGORY_OTHER, comment = "Фикс уязвимостей с пакетами")
+	public static boolean networkFix = true;
+
+	@ConfigBoolean(category = CATEGORY_PERFORMANCE,
+				   comment = "Проверка всех известных координат жидкостей помпой вместо вместо перестройки очереди (может повысить производительность)",
+				   oldCategory = CATEGORY_GENERAL)
+	public static boolean pumpFullQueueCheck = false;
+
+	public static void init()
+	{
+		ConfigUtils.readConfig(EventConfig.class);
+	}
 
 	static
 	{
-		try
-		{
-			Configuration cfg = FastUtils.getConfig("BuildCraft");
-			String c = Configuration.CATEGORY_GENERAL;
-			readStringSet(cfg, "autoCraftBlackList", c, "Чёрный список блоков для автокрафта", autoCraftBlackList);
-			readStringSet(cfg, "builderNbtTagBlackList", c, "Чёрный список NBT тэгов для строителя", builderNbtTagBlackList);
-			builderNbtDebug = cfg.getBoolean("builderNbtDebug", c, builderNbtDebug, "Вывод NBT тайлов для Строителя");
-			builderNbtDisable = cfg.getBoolean("builderNbtDisable", c, builderNbtDisable, "Выключить перенос NBT тайлов для Строителя");
-			cfg.save();
-		}
-		catch (final Throwable throwable)
-		{
-			System.err.println("Failed load config. Use default values.");
-			throwable.printStackTrace();
-		}
-	}
-
-	public static final boolean inList(Set<String> blackList, Item item, int meta)
-	{
-		if (item instanceof ItemBlock)
-			return inList(blackList, ((ItemBlock) item).field_150939_a, meta);
-
-		return inList(blackList, getId(item), meta);
-	}
-
-	public static final boolean inList(Set<String> blackList, Block block, int meta)
-	{
-		return inList(blackList, getId(block), meta);
-	}
-
-	private static final boolean inList(Set<String> blackList, String id, int meta)
-	{
-		return id != null && (blackList.contains(id) || blackList.contains(id + ':' + meta));
-	}
-
-	private static final void readStringSet(final Configuration cfg, final String name, final String category, final String comment, final Set<String> def)
-	{
-		final Set<String> temp = getStringSet(cfg, name, category, comment, def);
-		def.clear();
-		def.addAll(temp);
-	}
-
-	private static final Set<String> getStringSet(final Configuration cfg, final String name, final String category, final String comment, final Set<String> def)
-	{
-		return getStringSet(cfg, name, category, comment, def.toArray(new String[def.size()]));
-	}
-
-	private static final Set<String> getStringSet(final Configuration cfg, final String name, final String category, final String comment, final String... def)
-	{
-		return Sets.newHashSet(cfg.getStringList(name, category, def, comment));
-	}
-
-	private static final String getId(Item item)
-	{
-		return GameData.getItemRegistry().getNameForObject(item);
-	}
-
-	private static final String getId(Block block)
-	{
-		return GameData.getBlockRegistry().getNameForObject(block);
+		init();
 	}
 }

@@ -33,7 +33,6 @@ import buildcraft.transport.pluggable.PlugPluggable;
 import cofh.api.energy.IEnergyHandler;
 import com.gamerforea.buildcraft.ModUtils;
 import com.gamerforea.eventhelper.fake.FakePlayerContainer;
-import com.gamerforea.eventhelper.fake.FakePlayerContainerTileEntity;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
@@ -84,7 +83,7 @@ public class TileGenericPipe extends TileEntity
 	private int glassColor = -1;
 
 	// TODO gamerforEA code start
-	public final FakePlayerContainer fake = new FakePlayerContainerTileEntity(ModUtils.profile, this);
+	public final FakePlayerContainer fake = ModUtils.NEXUS_FACTORY.wrapFake(this);
 	// TODO gamerforEA code end
 
 	public static class CoreState implements ISerializable
@@ -1099,7 +1098,7 @@ public class TileGenericPipe extends TileEntity
 				for (int i = 0; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
 				{
 					final PipePluggable pluggable = this.getPipePluggable(ForgeDirection.getOrientation(i));
-					if (pluggable != null && pluggable instanceof GatePluggable)
+					if (pluggable instanceof GatePluggable)
 					{
 						final GatePluggable gatePluggable = (GatePluggable) pluggable;
 						Gate gate = this.pipe.gates[i];

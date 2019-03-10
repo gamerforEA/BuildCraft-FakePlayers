@@ -434,15 +434,16 @@ public class TileAutoWorkbench extends TileBuildCraft
 		if (result != null)
 			if (result.getItem() == null)
 				result = null;
-			else if (EventConfig.inList(EventConfig.autoCraftBlackList, result.getItem(), result.getItemDamage()))
+			else if (EventConfig.autoCraftBlackList.contains(result))
 				result = null;
-			else if (resultInto != null && result != null && result.isItemEqual(resultInto) && !ItemStack.areItemStackTagsEqual(result, resultInto))
+			else if (resultInto != null && result.isItemEqual(resultInto) && !ItemStack.areItemStackTagsEqual(result, resultInto))
 				result = null;
 		// TODO gamerforEA code end
 
 		if (result != null && result.stackSize > 0)
 		{
-			// TODO gamerforEA code clear: ItemStack resultInto = this.resultInv.getStackInSlot(0);
+			// TODO gamerforEA code clear:
+			// ItemStack resultInto = this.resultInv.getStackInSlot(0);
 
 			this.craftSlot.onPickupFromSlot(this.getInternalPlayer().get(), result);
 

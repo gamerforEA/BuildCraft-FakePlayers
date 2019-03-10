@@ -10,17 +10,18 @@ package buildcraft.api.blueprints;
 
 import buildcraft.api.core.BuildCraftAPI;
 import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import java.util.LinkedList;
 
 public class SchematicMask extends SchematicBlockBase
 {
-
 	public boolean isConcrete = true;
 
 	public SchematicMask()
@@ -33,41 +34,44 @@ public class SchematicMask extends SchematicBlockBase
 		this.isConcrete = isConcrete;
 	}
 
-	// TODO gamerforEA code start
 	@Override
 	public void placeInWorld(IBuilderContext context, int x, int y, int z, LinkedList<ItemStack> stacks)
-	{
-		this.placeInWorld(ModUtils.getModFake(context.world()), context, x, y, z, stacks);
-	}
-	// TODO gamerforEA code end
-
-	@Override
-	// TODO gamerforEA add EntityPlayer parameter
-	public void placeInWorld(EntityPlayer player, IBuilderContext context, int x, int y, int z, LinkedList<ItemStack> stacks)
 	{
 		if (this.isConcrete)
 		{
 			if (stacks.size() == 0 || !BuildCraftAPI.isSoftBlock(context.world(), x, y, z))
 				return;
-			else
+			ItemStack stack = stacks.getFirst();
+			EntityPlayer player = BuildCraftAPI.proxy.getBuildCraftPlayer((WorldServer) context.world()).get();
+
+			// force the block to be air block, in case it's just a soft
+			// block which replacement is not straightforward
+			context.world().setBlock(x, y, z, Blocks.air, 0, 3);
+
+			// Find nearest solid surface to place on
+			ForgeDirection dir = ForgeDirection.DOWN;
+			while (dir != ForgeDirection.UNKNOWN && BuildCraftAPI.isSoftBlock(context.world(), x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
 			{
-				ItemStack stack = stacks.getFirst();
-
-				// TODO gamerforEA code clear: EntityPlayer player = BuildCraftAPI.proxy.getBuildCraftPlayer((WorldServer) context.world()).get();
-
-				// force the block to be air block, in case it's just a soft
-				// block which replacement is not straightforward
-				context.world().setBlock(x, y, z, Blocks.air, 0, 3);
-
-				// Find nearest solid surface to place on
-				ForgeDirection dir = ForgeDirection.DOWN;
-				while (dir != ForgeDirection.UNKNOWN && BuildCraftAPI.isSoftBlock(context.world(), x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ))
-				{
-					dir = ForgeDirection.getOrientation(dir.ordinal() + 1);
-				}
-
-				stack.tryPlaceItemIntoWorld(player, context.world(), x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, dir.getOpposite().ordinal(), 0.0f, 0.0f, 0.0f);
+				dir = ForgeDirection.getOrientation(dir.ordinal() + 1);
 			}
+
+			int xx = x + dir.offsetX;
+			int yy = y + dir.offsetY;
+			int zz = z + dir.offsetZ;
+
+			// TODO gamerforEA code start
+			EntityPlayer currentPlayer = ModUtils.CURRENT_PLAYER.get();
+
+			if (currentPlayer == null)
+				currentPlayer = ModUtils.getModFake(context.world());
+			else
+				player = currentPlayer;
+
+			if (EventUtils.cantBreak(currentPlayer, xx, yy, zz))
+				return;
+			// TODO gamerforEA code end
+
+			stack.tryPlaceItemIntoWorld(player, context.world(), xx, yy, zz, dir.getOpposite().ordinal(), 0.0f, 0.0f, 0.0f);
 		}
 		else
 			context.world().setBlock(x, y, z, Blocks.air, 0, 3);
@@ -78,8 +82,7 @@ public class SchematicMask extends SchematicBlockBase
 	{
 		if (this.isConcrete)
 			return !BuildCraftAPI.getWorldProperty("replaceable").get(context.world(), x, y, z);
-		else
-			return BuildCraftAPI.getWorldProperty("replaceable").get(context.world(), x, y, z);
+		return BuildCraftAPI.getWorldProperty("replaceable").get(context.world(), x, y, z);
 	}
 
 	@Override

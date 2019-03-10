@@ -15,16 +15,17 @@ import buildcraft.api.core.Position;
 import buildcraft.core.blueprints.IndexRequirementMap;
 import buildcraft.core.lib.utils.BlockUtils;
 import com.gamerforea.buildcraft.ModUtils;
+import com.gamerforea.eventhelper.util.EventUtils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,68 +55,67 @@ public class BuildingSlotBlock extends BuildingSlot
 		return this.schematic;
 	}
 
-	// TODO gamerforEA code start
 	@Override
 	public boolean writeToWorld(IBuilderContext context)
-	{
-		return this.writeToWorld(ModUtils.getModFake(context.world()), context);
-	}
-	// TODO gamerforEA code end
-
-	@Override
-	// TODO gamerforEA add EntityPlayer parameter
-	public boolean writeToWorld(EntityPlayer player, IBuilderContext context)
 	{
 		if (this.internalRequirementRemovalListener != null)
 			this.internalRequirementRemovalListener.remove(this);
 
+		World world = context.world();
+
+		// TODO gamerforEA code start
+		EntityPlayer player = ModUtils.CURRENT_PLAYER.get();
+		if (player == null)
+			player = ModUtils.getModFake(world);
+		if (EventUtils.cantBreak(player, this.x, this.y, this.z))
+			return false;
+		// TODO gamerforEA code end
+
 		if (this.mode == Mode.ClearIfInvalid)
 		{
 			if (!this.getSchematic().isAlreadyBuilt(context, this.x, this.y, this.z))
+			{
 				if (BuildCraftBuilders.dropBrokenBlocks)
-					return BlockUtils.breakBlock((WorldServer) context.world(), this.x, this.y, this.z);
-				else
-				{
-					context.world().setBlockToAir(this.x, this.y, this.z);
-					return true;
-				}
+					return BlockUtils.breakBlock((WorldServer) world, this.x, this.y, this.z);
+				world.setBlockToAir(this.x, this.y, this.z);
+				return true;
+			}
 		}
 		else
 			try
 			{
-				// TODO gamerforEA add EntityPlayer parameter
-				this.getSchematic().placeInWorld(player, context, this.x, this.y, this.z, this.stackConsumed);
+				this.getSchematic().placeInWorld(context, this.x, this.y, this.z, this.stackConsumed);
 
 				// This is also slightly hackish, but that's what you get when
 				// you're unable to break an API too much.
 				if (!this.getSchematic().isAlreadyBuilt(context, this.x, this.y, this.z))
-					if (context.world().isAirBlock(this.x, this.y, this.z))
+				{
+					if (world.isAirBlock(this.x, this.y, this.z))
 						return false;
-					else if (!(this.getSchematic() instanceof SchematicBlock) || context.world().getBlock(this.x, this.y, this.z).isAssociatedBlock(((SchematicBlock) this.getSchematic()).block))
+					if (!(this.getSchematic() instanceof SchematicBlock) || world.getBlock(this.x, this.y, this.z).isAssociatedBlock(((SchematicBlock) this.getSchematic()).block))
 					{
 						BCLog.logger.warn("Placed block does not match expectations! Most likely a bug in BuildCraft or a supported mod. Removed mismatched block.");
-						BCLog.logger.warn("Location: " + this.x + ", " + this.y + ", " + this.z + " - Block: " + Block.blockRegistry.getNameForObject(context.world().getBlock(this.x, this.y, this.z)) + "@" + context.world().getBlockMetadata(this.x, this.y, this.z));
-						context.world().removeTileEntity(this.x, this.y, this.z);
-						context.world().setBlockToAir(this.x, this.y, this.z);
+						BCLog.logger.warn("Location: " + this.x + ", " + this.y + ", " + this.z + " - Block: " + Block.blockRegistry.getNameForObject(world.getBlock(this.x, this.y, this.z)) + "@" + world.getBlockMetadata(this.x, this.y, this.z));
+						world.removeTileEntity(this.x, this.y, this.z);
+						world.setBlockToAir(this.x, this.y, this.z);
 						return true;
 					}
-					else
-						return false;
+					return false;
+				}
 
 				// This is slightly hackish, but it's a very important way to verify
 				// the stored requirements for anti-cheating purposes.
-				if (!context.world().isAirBlock(this.x, this.y, this.z) && this.getSchematic().getBuildingPermission() == BuildingPermission.ALL && this.getSchematic() instanceof SchematicBlock)
+				if (!world.isAirBlock(this.x, this.y, this.z) && this.getSchematic().getBuildingPermission() == BuildingPermission.ALL && this.getSchematic() instanceof SchematicBlock)
 				{
 					SchematicBlock sb = (SchematicBlock) this.getSchematic();
 					// Copy the old array of stored requirements.
 					ItemStack[] oldRequirementsArray = sb.storedRequirements;
-					List<ItemStack> oldRequirements = Arrays.asList(oldRequirementsArray);
 					sb.storedRequirements = new ItemStack[0];
 					sb.storeRequirements(context, this.x, this.y, this.z);
 					for (ItemStack s : sb.storedRequirements)
 					{
 						boolean contains = false;
-						for (ItemStack ss : oldRequirements)
+						for (ItemStack ss : oldRequirementsArray)
 						{
 							if (this.getSchematic().isItemMatchingRequirement(s, ss))
 							{
@@ -127,8 +127,8 @@ public class BuildingSlotBlock extends BuildingSlot
 						{
 							BCLog.logger.warn("Blueprint has MISMATCHING REQUIREMENTS! Potential corrupted/hacked blueprint! Removed mismatched block.");
 							BCLog.logger.warn("Location: " + this.x + ", " + this.y + ", " + this.z + " - ItemStack: " + s.toString());
-							context.world().removeTileEntity(this.x, this.y, this.z);
-							context.world().setBlockToAir(this.x, this.y, this.z);
+							world.removeTileEntity(this.x, this.y, this.z);
+							world.setBlockToAir(this.x, this.y, this.z);
 							return true;
 						}
 					}
@@ -143,7 +143,7 @@ public class BuildingSlotBlock extends BuildingSlot
 				// the world, we're logging the problem and setting the block to
 				// air.
 
-				TileEntity e = context.world().getTileEntity(this.x, this.y, this.z);
+				TileEntity e = world.getTileEntity(this.x, this.y, this.z);
 
 				if (e != null)
 					e.updateEntity();
@@ -153,7 +153,7 @@ public class BuildingSlotBlock extends BuildingSlot
 			catch (Throwable t)
 			{
 				t.printStackTrace();
-				context.world().setBlockToAir(this.x, this.y, this.z);
+				world.setBlockToAir(this.x, this.y, this.z);
 				return false;
 			}
 

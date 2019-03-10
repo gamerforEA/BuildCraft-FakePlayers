@@ -11,6 +11,7 @@ package buildcraft.core.lib.utils;
 import buildcraft.BuildCraftCore;
 import buildcraft.api.blueprints.BuilderAPI;
 import buildcraft.core.proxy.CoreProxy;
+import com.gamerforea.buildcraft.ModUtils;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStaticLiquid;
@@ -147,7 +148,14 @@ public final class BlockUtils
 
 	public static boolean breakBlock(WorldServer world, int x, int y, int z, List<ItemStack> drops)
 	{
-		BreakEvent breakEvent = new BreakEvent(x, y, z, world, world.getBlock(x, y, z), world.getBlockMetadata(x, y, z), CoreProxy.proxy.getBuildCraftPlayer(world).get());
+		// TODO gamerforEA code replace, old code:
+		// EntityPlayer player = CoreProxy.proxy.getBuildCraftPlayer(world).get();
+		EntityPlayer player = ModUtils.CURRENT_PLAYER.get();
+		if (player == null)
+			player = CoreProxy.proxy.getBuildCraftPlayer(world).get();
+		// TODO gamerforEA code end
+
+		BreakEvent breakEvent = new BreakEvent(x, y, z, world, world.getBlock(x, y, z), world.getBlockMetadata(x, y, z), player);
 		MinecraftForge.EVENT_BUS.post(breakEvent);
 
 		if (breakEvent.isCanceled())

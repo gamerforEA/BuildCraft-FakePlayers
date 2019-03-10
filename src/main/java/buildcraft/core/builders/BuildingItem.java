@@ -183,13 +183,30 @@ public class BuildingItem implements IBuildingItem, ISerializable
 			Block oldBlock = this.context.world().getBlock(destX, destY, destZ);
 			int oldMeta = this.context.world().getBlockMetadata(destX, destY, destZ);
 
-			// TODO gamerforEA code replace, old code: if (this.slotToBuild.writeToWorld(this.context))
+			// TODO gamerforEA code replace, old code:
+			// if (this.slotToBuild.writeToWorld(this.context))
 			int originX = MathHelper.floor_double(this.origin.x);
 			int originY = MathHelper.floor_double(this.origin.y);
 			int originZ = MathHelper.floor_double(this.origin.z);
 			TileEntity originTile = this.context.world().getTileEntity(originX, originY, originZ);
-			EntityPlayer player = originTile instanceof TileBuildCraft ? ((TileBuildCraft) originTile).fake.get() : ModUtils.getModFake(this.context.world());
-			if (this.slotToBuild.writeToWorld(player, this.context))
+			EntityPlayer player = originTile instanceof TileBuildCraft ? ((TileBuildCraft) originTile).fake.get() : null;
+
+			boolean success;
+			EntityPlayer prevPlayer = ModUtils.CURRENT_PLAYER.get();
+			boolean playerReplaced = player != null;
+			if (playerReplaced)
+				ModUtils.CURRENT_PLAYER.set(player);
+			try
+			{
+				success = this.slotToBuild.writeToWorld(this.context);
+			}
+			finally
+			{
+				if (playerReplaced)
+					ModUtils.CURRENT_PLAYER.set(prevPlayer);
+			}
+
+			if (success)
 				// TODO gamerforEA code end
 				this.context.world().playAuxSFXAtEntity(null, 2001, destX, destY, destZ, Block.getIdFromBlock(oldBlock) + (oldMeta << 12));
 			else if (this.slotToBuild.stackConsumed != null)

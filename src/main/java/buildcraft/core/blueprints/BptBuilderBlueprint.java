@@ -193,7 +193,14 @@ public class BptBuilderBlueprint extends BptBuilderBase
 			for (BuildingSlotBlock b : lb)
 			{
 				if (b.mode == Mode.ClearIfInvalid)
+				{
+					// TODO gamerforEA code start
+					if (EventUtils.cantBreak(ModUtils.getModFake(this.context.world()), b.x, b.y, b.z))
+						continue;
+					// TODO gamerforEA code end
+
 					this.context.world.setBlockToAir(b.x, b.y, b.z);
+				}
 				else if (!b.schematic.doNotBuild())
 				{
 					b.stackConsumed = new LinkedList<>();
